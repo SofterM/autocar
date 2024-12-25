@@ -1,6 +1,6 @@
 // src/components/Navbar.tsx
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { FaCog, FaBell } from 'react-icons/fa'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -26,11 +26,32 @@ export default function Navbar() {
     { id: 2, message: "ระบบอัพเดทเรียบร้อยแล้ว", isRead: true },
   ])
   const pathname = usePathname()
+  
+  // Add refs for click outside detection
+  const userMenuRef = useRef<HTMLDivElement>(null)
+  const notificationsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const userStr = localStorage.getItem('user')
     if (userStr) {
       setUser(JSON.parse(userStr))
+    }
+  }, [])
+
+  // Add click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false)
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setShowNotifications(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [])
 
@@ -52,22 +73,20 @@ export default function Navbar() {
 
   const handleNotificationClick = (notificationId: number) => {
     setNotifications(notifications.map(notification => 
-      notification.id === notificationId 
-        ? { ...notification, isRead: true }
-        : notification
+      notification.id === notificationId ? { ...notification, isRead: true } : notification
     ))
   }
 
   return (
     <>
-      <motion.nav 
+      <motion.nav
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="container mx-auto px-4 sm:px-6 py-4 relative z-10"
       >
         <div className="flex items-center justify-between">
-          <motion.div 
+          <motion.div
             className="flex items-center gap-2"
             whileHover={{ scale: 1.05 }}
           >
@@ -76,7 +95,7 @@ export default function Navbar() {
             </div>
             <span className="text-white text-xl sm:text-2xl font-bold">AutoService</span>
           </motion.div>
-          
+
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -113,8 +132,7 @@ export default function Navbar() {
 
           {user ? (
             <div className="hidden md:flex items-center space-x-6">
-              {/* Notifications */}
-              <div className="relative">
+              <div className="relative" ref={notificationsRef}>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -153,8 +171,7 @@ export default function Navbar() {
                 </AnimatePresence>
               </div>
 
-              {/* User Menu */}
-              <div className="relative">
+              <div className="relative" ref={userMenuRef}>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -201,7 +218,7 @@ export default function Navbar() {
             </div>
           ) : (
             <div className="hidden md:flex items-center space-x-4">
-              <motion.button 
+              <motion.button
                 onClick={() => setShowRegisterModal(true)}
                 className="text-gray-300 hover:text-white transition-colors"
                 whileHover={{ scale: 1.05 }}
@@ -209,7 +226,7 @@ export default function Navbar() {
               >
                 สมัครสมาชิก
               </motion.button>
-              <motion.button 
+              <motion.button
                 onClick={() => setShowLoginModal(true)}
                 className="bg-[#6C63FF] text-white px-6 py-2 rounded-lg"
                 whileHover={{ scale: 1.05, backgroundColor: "#5B53FF" }}
@@ -223,7 +240,7 @@ export default function Navbar() {
 
         <AnimatePresence>
           {isMenuOpen && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
@@ -242,13 +259,65 @@ export default function Navbar() {
                     {item.name}
                   </a>
                 ))}
+                
+                {user ? (
+                  <>
+                    <div className="border-t border-gray-700 pt-4">
+                      <div className="px-4 py-2 text-gray-300">
+                        {user.firstName} {user.lastName}
+                      </div>
+                      <button
+                        className="w-full px-4 py-2 text-left text-gray-300 hover:text-white flex items-center space-x-2"
+                        onClick={() => {/* Handle profile click */}}
+                      >
+                        <User size={16} />
+                        <span>โปรไฟล์</span>
+                      </button>
+                      <button
+                        className="w-full px-4 py-2 text-left text-gray-300 hover:text-white flex items-center space-x-2"
+                        onClick={() => {/* Handle settings click */}}
+                      >
+                        <Settings size={16} />
+                        <span>ตั้งค่า</span>
+                      </button>
+                      <button
+                        className="w-full px-4 py-2 text-left text-red-500 hover:text-red-400 flex items-center space-x-2"
+                        onClick={handleLogout}
+                      >
+                        <LogOut size={16} />
+                        <span>ออกจากระบบ</span>
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="border-t border-gray-700 pt-4 space-y-2">
+                    <button
+                      onClick={() => {
+                        setShowLoginModal(true)
+                        setIsMenuOpen(false)
+                      }}
+                      className="w-full px-4 py-2 bg-[#6C63FF] text-white rounded-lg hover:bg-[#5B53FF] transition-colors"
+                    >
+                      เข้าสู่ระบบ
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowRegisterModal(true)
+                        setIsMenuOpen(false)
+                      }}
+                      className="w-full px-4 py-2 text-gray-300 hover:text-white transition-colors"
+                    >
+                      สมัครสมาชิก
+                    </button>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </motion.nav>
 
-      <LoginModal 
+      <LoginModal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
         isDark={true}
