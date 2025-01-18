@@ -66,7 +66,7 @@ export default function Navbar() {
     { name: 'หน้าแรก', path: '/' },
     { name: 'แดชบอร์ด', path: '/dashboard' },
     { name: 'รายงาน', path: '/reports' },
-    { name: 'ตั้งค่า', path: '/settings' }
+    { name: 'ตั้งค่า', path: '/admin' }
   ]
 
   const unreadNotifications = notifications.filter(n => !n.isRead).length
