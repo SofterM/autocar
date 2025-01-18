@@ -1,13 +1,12 @@
 'use client'
 
-// Previous imports remain the same
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Users,
   CircleDollarSign,
   Wrench,
   Car,
-  Bell,
   LayoutDashboard,
   ChevronRight,
   Star,
@@ -23,9 +22,28 @@ import {
 } from 'lucide-react';
 
 const AdminDashboard = () => {
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [userData, setUserData] = useState({ email: '', firstName: '', lastName: '' });
 
-  // Previous data structures remain the same
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    router.push('/');
+  };
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      setUserData({
+        email: user.email,
+        firstName: user.firstName || 'ผู้',
+        lastName: user.lastName || 'ใช้งาน'
+      });
+    }
+  }, []);
+
   const quickStats = [
     {
       label: 'งานซ่อมวันนี้',
@@ -67,7 +85,6 @@ const AdminDashboard = () => {
     { icon: Users, label: 'จัดการพนักงาน' },
     { icon: Package, label: 'คลังอะไหล่' },
     { icon: BarChart3, label: 'รายงาน' },
-    { icon: Bell, label: 'การแจ้งเตือน' },
     { icon: MessageSquare, label: 'รีวิวและคะแนน' }
   ];
 
@@ -145,7 +162,10 @@ const AdminDashboard = () => {
                 <HelpCircle className="h-5 w-5" />
                 {isSidebarOpen && <span className="font-medium">ช่วยเหลือ</span>}
               </button>
-              <button className="flex items-center gap-3 w-full p-3 text-rose-600 hover:bg-rose-50 rounded-xl transition-all duration-200">
+              <button 
+                onClick={handleLogout}
+                className="flex items-center gap-3 w-full p-3 text-rose-600 hover:bg-rose-50 rounded-xl transition-all duration-200"
+              >
                 <LogOut className="h-5 w-5" />
                 {isSidebarOpen && <span className="font-medium">ออกจากระบบ</span>}
               </button>
@@ -176,17 +196,13 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 hover:bg-gray-100 rounded-lg relative">
-                <Bell className="h-5 w-5 text-gray-700" />
-                <span className="absolute top-1 right-1 h-2 w-2 bg-rose-500 rounded-full"></span>
-              </button>
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center text-white font-medium">
-                  A
+                  {userData.firstName.charAt(0)}
                 </div>
                 <div className="hidden sm:block">
-                  <p className="text-sm font-semibold text-gray-900">Admin User</p>
-                  <p className="text-sm text-gray-700">admin@powerpuff.com</p>
+                  <p className="text-sm font-semibold text-gray-900">{userData.firstName} {userData.lastName}</p>
+                  <p className="text-sm text-gray-700">{userData.email}</p>
                 </div>
               </div>
             </div>
@@ -198,7 +214,7 @@ const AdminDashboard = () => {
           <div className="space-y-6">
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {quickStats.map((stat, index) => (
+              {quickStats.map((stat) => (
                 <div
                   key={stat.label}
                   className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300"
