@@ -9,9 +9,7 @@ import {
   Menu,
   Bell,
   Settings,
-  Filter,
-  SlidersHorizontal
-} from 'lucide-react';
+  Filter} from 'lucide-react';
 import Sidebar from '@/components/admin/Sidebar';
 import { PartsTable } from '@/components/parts/PartsTable';
 import { AddPartModal } from '@/components/parts/AddPartModal';
