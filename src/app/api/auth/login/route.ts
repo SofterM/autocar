@@ -3,31 +3,32 @@ import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import pool from '@/lib/db'
+import { RowDataPacket } from 'mysql2/promise'
 
-interface User {
+interface UserRow extends RowDataPacket {
   id: number;
   email: string;
-  password: string;
+  password_hash: string;
   first_name: string;
   last_name: string;
-  role: string;
+  role: 'admin' | 'technician' | 'staff';
+  phone: string | null;
 }
 
 export async function POST(req: Request) {
   try {
     const body = await req.json()
     
-    // ตรวจสอบว่ามี JWT_SECRET หรือไม่
     if (!process.env.JWT_SECRET) {
       throw new Error('JWT_SECRET is not configured')
     }
     
-    const [users] = await pool.execute(
+    const [users] = await pool.execute<UserRow[]>(
       'SELECT * FROM users WHERE email = ?',
       [body.email]
     )
     
-    const user = (users as User[])[0]
+    const user = users[0]
     
     if (!user) {
       return NextResponse.json(
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const validPassword = await bcrypt.compare(body.password, user.password)
+    const validPassword = await bcrypt.compare(body.password, user.password_hash)
     if (!validPassword) {
       return NextResponse.json(
         { error: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' },
@@ -61,7 +62,8 @@ export async function POST(req: Request) {
         email: user.email,
         firstName: user.first_name,
         lastName: user.last_name,
-        role: user.role
+        role: user.role,
+        phone: user.phone
       }
     })
 
