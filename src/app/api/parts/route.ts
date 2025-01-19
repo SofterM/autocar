@@ -1,4 +1,4 @@
-// src/app/api/parts/route.ts
+// D:\Github\autocar\src\app\api\parts\route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';

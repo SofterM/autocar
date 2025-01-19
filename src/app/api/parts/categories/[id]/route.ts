@@ -1,30 +1,31 @@
-// /app/api/parts/categories/[id]/route.ts
-import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import pool from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
 
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
+    const id = params.id;
+
     const [rows] = await pool.query<RowDataPacket[]>(
       'SELECT * FROM parts_categories WHERE id = ?',
-      [params.id]
+      [id]
     );
 
     if (rows.length === 0) {
-      return NextResponse.json(
+      return Response.json(
         { error: 'Category not found' }, 
         { status: 404 }
       );
     }
 
-    return NextResponse.json(rows[0]);
-
+    return Response.json(rows[0]);
   } catch (error) {
     console.error('Database error:', error);
-    return NextResponse.json(
+    return Response.json(
       { error: 'Failed to fetch category' }, 
       { status: 500 }
     );
@@ -32,35 +33,35 @@ export async function GET(
 }
 
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const body = await req.json();
+    const params = await context.params;
+    const id = params.id;
+    const body = await request.json();
 
     const [result] = await pool.query(
       'UPDATE parts_categories SET ? WHERE id = ?',
-      [body, params.id]
+      [body, id]
     );
 
     if ('affectedRows' in result && result.affectedRows === 0) {
-      return NextResponse.json(
+      return Response.json(
         { error: 'Category not found' }, 
         { status: 404 }
       );
     }
 
-    // Fetch the updated category
     const [updatedCategory] = await pool.query<RowDataPacket[]>(
       'SELECT * FROM parts_categories WHERE id = ?',
-      [params.id]
+      [id]
     );
 
-    return NextResponse.json(updatedCategory[0]);
-
+    return Response.json(updatedCategory[0]);
   } catch (error) {
     console.error('Database error:', error);
-    return NextResponse.json(
+    return Response.json(
       { error: 'Failed to update category' }, 
       { status: 500 }
     );
@@ -68,42 +69,43 @@ export async function PUT(
 }
 
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    // ตรวจสอบว่ามีอะไหล่ที่ใช้หมวดหมู่นี้อยู่หรือไม่
+    const params = await context.params;
+    const id = params.id;
+
     const [parts] = await pool.query<RowDataPacket[]>(
       'SELECT COUNT(*) as count FROM parts WHERE category_id = ?',
-      [params.id]
+      [id]
     );
 
     if (parts[0].count > 0) {
-      return NextResponse.json(
-        { error: 'ไม่สามารถลบหมวดหมู่ได้เนื่องจากมีอะไหล่ที่ใช้หมวดหมู่นี้อยู่' }, 
+      return Response.json(
+        { error: 'ไม่สามารถลบหมวดหมู่ได้เนื่องจากมีอะไหล่ที่ใช้หมวดหมู่นี้อยู่' },
         { status: 400 }
       );
     }
 
     const [result] = await pool.query(
       'DELETE FROM parts_categories WHERE id = ?',
-      [params.id]
+      [id]
     );
 
     if ('affectedRows' in result && result.affectedRows === 0) {
-      return NextResponse.json(
+      return Response.json(
         { error: 'Category not found' }, 
         { status: 404 }
       );
     }
 
-    return NextResponse.json(
+    return Response.json(
       { message: 'Category deleted successfully' }
     );
-
   } catch (error) {
     console.error('Database error:', error);
-    return NextResponse.json(
+    return Response.json(
       { error: 'Failed to delete category' }, 
       { status: 500 }
     );
