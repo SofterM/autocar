@@ -1,17 +1,25 @@
-// src/components/Navbar.tsx
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { FaCog, FaBell } from 'react-icons/fa'
 import { motion, AnimatePresence } from 'framer-motion'
 import LoginModal from './LoginModal'
 import RegisterModal from './RegisterModal'
 import { ChevronDown, LogOut, User, Settings } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 
 interface UserType {
+  id: number;
   firstName: string;
   lastName: string;
   email: string;
+  role: 'admin' | 'technician' | 'staff';
+  phone: string | null;
+}
+
+interface AuthResponse {
+  token: string;
+  user: UserType;
 }
 
 export default function Navbar() {
@@ -25,20 +33,27 @@ export default function Navbar() {
     { id: 1, message: "มีการแจ้งเตือนใหม่", isRead: false },
     { id: 2, message: "ระบบอัพเดทเรียบร้อยแล้ว", isRead: true },
   ])
-  const pathname = usePathname()
   
-  // Add refs for click outside detection
+  const pathname = usePathname()
+  const router = useRouter()
+  
   const userMenuRef = useRef<HTMLDivElement>(null)
   const notificationsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    const token = localStorage.getItem('token')
     const userStr = localStorage.getItem('user')
-    if (userStr) {
-      setUser(JSON.parse(userStr))
+    if (token && userStr) {
+      try {
+        const userData = JSON.parse(userStr)
+        setUser(userData)
+      } catch (error) {
+        console.error('Error parsing user data:', error)
+        handleLogout()
+      }
     }
   }, [])
 
-  // Add click outside handler
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
@@ -55,11 +70,29 @@ export default function Navbar() {
     }
   }, [])
 
+  const handleAuthResponse = (response: AuthResponse) => {
+    const { token, user } = response
+    localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(user))
+    setUser(user)
+    setShowLoginModal(false)
+    setShowRegisterModal(false)
+    toast.success('เข้าสู่ระบบสำเร็จ')
+    
+    // Redirect based on user role
+    if (user.role === 'admin') {
+      router.push('/admin')
+    } else {
+      router.push('/')
+    }
+  }
+
   const handleLogout = () => {
     localStorage.removeItem('user')
     localStorage.removeItem('token')
     setUser(null)
-    window.location.reload()
+    router.push('/')
+    toast.success('ออกจากระบบสำเร็จ')
   }
 
   const menuItems = [
@@ -326,6 +359,7 @@ export default function Navbar() {
         isOpen={showRegisterModal}
         onClose={() => setShowRegisterModal(false)}
         isDark={true}
+        onSuccess={handleAuthResponse}
       />
     </>
   )
