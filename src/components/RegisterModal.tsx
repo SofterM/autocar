@@ -1,10 +1,24 @@
-// src/components/RegisterModal.tsx
 "use client"
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Mail, KeyRound, Eye, EyeOff, Loader2, AlertCircle, User, Phone } from 'lucide-react'
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import { z } from 'zod'
+
+interface UserData {
+  id: number
+  email: string
+  firstName: string
+  lastName: string
+  role: 'admin' | 'technician' | 'staff'
+  phone: string | null
+}
+
+interface AuthResponse {
+  token: string
+  user: UserData
+  message?: string
+}
 
 const registerSchema = z.object({
   email: z.string().email('อีเมลไม่ถูกต้อง'),
@@ -18,9 +32,10 @@ interface RegisterModalProps {
   isOpen: boolean
   onClose: () => void
   isDark?: boolean
+  onSuccess: (response: AuthResponse) => void
 }
 
-export const RegisterModal = ({ isOpen, onClose, isDark = true }: RegisterModalProps) => {
+export const RegisterModal = ({ isOpen, onClose, onSuccess, isDark = true }: RegisterModalProps) => {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -41,14 +56,18 @@ export const RegisterModal = ({ isOpen, onClose, isDark = true }: RegisterModalP
       // Validate form data
       registerSchema.parse(formData)
 
-      const response = await axios.post('/api/auth/register', formData)
-      if (response.data.message) {
+      const response = await axios.post<AuthResponse>('/api/auth/register', formData)
+      
+      if (response.data) {
+        onSuccess(response.data)
         onClose()
-        // Optional: Show success message or redirect
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
         setError(error.errors[0].message)
+      } else if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<{ error: string }>
+        setError(axiosError.response?.data?.error || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')
       } else if (error instanceof Error) {
         setError(error.message)
       } else {
