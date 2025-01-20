@@ -1,4 +1,3 @@
-
 'use client'
 
 import React, { useState, useEffect } from 'react';
@@ -109,11 +108,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       <aside 
         className={`
-          fixed lg:static z-30 
+          fixed lg:sticky lg:top-0 z-30 
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} 
           ${isSidebarOpen ? 'w-64' : 'lg:w-20'} 
-          min-h-screen bg-white border-r border-gray-200 
+          h-screen bg-white border-r border-gray-200 
           transition-all duration-300 ease-in-out
+          flex flex-col
         `}
       >
         <div className="flex flex-col h-full">
@@ -175,19 +175,17 @@ const Sidebar: React.FC<SidebarProps> = ({
             ))}
           </div>
 
-          {/* Bottom Buttons */}
-          <div className="p-4 border-t border-gray-200">
-            <div className="space-y-2">
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-3 w-full p-3 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
-              >
-                <LogOut className="h-5 w-5" />
-                {(isSidebarOpen || isMobile) && (
-                  <span className="text-sm font-medium">ออกจากระบบ</span>
-                )}
-              </button>
-            </div>
+          {/* Bottom Buttons - Fixed Position */}
+          <div className="sticky bottom-0 p-4 mt-auto border-t border-gray-200 bg-white">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 w-full p-3 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+            >
+              <LogOut className="h-5 w-5" />
+              {(isSidebarOpen || isMobile) && (
+                <span className="text-sm font-medium">ออกจากระบบ</span>
+              )}
+            </button>
           </div>
         </div>
       </aside>
