@@ -108,11 +108,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       <aside 
         className={`
-          fixed lg:static z-30 
+          fixed top-0 left-0 h-screen overflow-hidden
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} 
           ${isSidebarOpen ? 'w-64' : 'lg:w-20'} 
-          min-h-screen bg-white border-r border-gray-200 
+          bg-white border-r border-gray-200 
           transition-all duration-300 ease-in-out
+          z-30 flex flex-col
         `}
       >
         <div className="flex flex-col h-full">
@@ -140,7 +141,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           {/* Navigation Menus */}
-          <div className="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
+          <div className="flex-1 px-4 py-6 space-y-6 overflow-y-auto scrollbar-hide">
             {menuItems.map((section, index) => (
               <div key={index} className="space-y-3">
                 {(isSidebarOpen || isMobile) && (
@@ -175,7 +176,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           {/* Bottom Buttons */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-gray-200 mt-auto">
             <div className="space-y-2">
               <button
                 onClick={handleLogout}
