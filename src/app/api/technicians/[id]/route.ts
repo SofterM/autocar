@@ -15,6 +15,19 @@ export async function PATCH(
         connection = await pool.getConnection();
         await connection.beginTransaction();
 
+        // Get current technician data
+        const [currentTech] = await connection.execute(
+            'SELECT status FROM technicians WHERE id = ?',
+            [id]
+        );
+
+        if ((currentTech as any[]).length === 0) {
+            return NextResponse.json(
+                { error: 'Technician not found' },
+                { status: 404 }
+            );
+        }
+
         // Update technician
         await connection.execute(
             `UPDATE technicians 
@@ -23,28 +36,23 @@ export async function PATCH(
             [name, position, status, id]
         );
 
-        // If status is changed to inactive, update user role back to staff
-        if (status === 'inactive') {
+        // Update user role only if status changed
+        const currentStatus = (currentTech as any[])[0].status;
+        if (currentStatus !== status) {
             await connection.execute(
                 `UPDATE users u
                  JOIN technicians t ON u.id = t.user_id
-                 SET u.role = 'staff'
+                 SET u.role = ?
                  WHERE t.id = ?`,
-                [id]
-            );
-        } else if (status === 'active') {
-            await connection.execute(
-                `UPDATE users u
-                 JOIN technicians t ON u.id = t.user_id
-                 SET u.role = 'technician'
-                 WHERE t.id = ?`,
-                [id]
+                [status === 'active' ? 'technician' : 'staff', id]
             );
         }
 
         await connection.commit();
-
-        return NextResponse.json({ message: 'Technician updated successfully' });
+        return NextResponse.json({ 
+            message: 'Technician updated successfully',
+            status: status
+        });
 
     } catch (error) {
         if (connection) await connection.rollback();
@@ -84,22 +92,28 @@ export async function DELETE(
 
         const technician = (technicians as any[])[0];
 
-        // First update technician status to inactive
-        await connection.execute(
-            'UPDATE technicians SET status = ? WHERE id = ?',
-            ['inactive', id]
-        );
-
         // Update user role back to staff
         await connection.execute(
             'UPDATE users SET role = ? WHERE id = ?',
             ['staff', technician.user_id]
         );
 
+        // First delete repair assignments
+        await connection.execute(
+            'UPDATE repairs SET technician_id = NULL WHERE technician_id = ?',
+            [id]
+        );
+
+        // Now delete the technician record
+        await connection.execute(
+            'DELETE FROM technicians WHERE id = ?',
+            [id]
+        );
+
         await connection.commit();
 
         return NextResponse.json({ 
-            message: 'Technician deleted successfully' 
+            message: 'Technician deleted successfully'
         });
 
     } catch (error) {
