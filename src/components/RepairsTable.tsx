@@ -1,4 +1,3 @@
-// D:\Github\autocar\src\components\RepairsTable.tsx
 'use client'
 
 import React from 'react';
@@ -80,10 +79,63 @@ export const RepairsTable: React.FC<RepairsTableProps> = ({
         );
     }
 
+    // Card view for mobile screens
+    const MobileRepairCard = ({ repair }: { repair: Repair }) => (
+        <div className="bg-white p-4 border-b border-gray-200 last:border-b-0">
+            <div className="flex justify-between items-start mb-3">
+                <div>
+                    <h3 className="font-medium text-gray-900">
+                        {repair.brand} {repair.model}
+                    </h3>
+                    <p className="text-sm text-gray-500">ทะเบียน: {repair.license_plate}</p>
+                </div>
+                <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${getStatusBadgeStyle(repair.status)}`}>
+                    {getStatusText(repair.status)}
+                </span>
+            </div>
+
+            <div className="space-y-2 text-sm">
+                <div>
+                    <p className="text-gray-500">ลูกค้า: <span className="text-gray-900">{repair.customer?.name}</span></p>
+                    <p className="text-gray-500">โทร: <span className="text-gray-900">{formatPhoneNumber(repair.customer?.phone)}</span></p>
+                </div>
+                
+                <div>
+                    <p className="text-gray-500">วันรับรถ: <span className="text-gray-900">{formatDate(repair.start_date)}</span></p>
+                    <p className="text-gray-500">นัดรับรถ: <span className="text-gray-900">{repair.expected_end_date ? formatDate(repair.expected_end_date) : '-'}</span></p>
+                </div>
+
+                <div>
+                    <p className="text-gray-500">ประเมินราคา: <span className="text-gray-900">฿{repair.estimated_cost?.toLocaleString()}</span></p>
+                    {repair.final_cost && (
+                        <p className="text-gray-500">ค่าซ่อมจริง: <span className="text-gray-900">฿{repair.final_cost?.toLocaleString()}</span></p>
+                    )}
+                </div>
+            </div>
+
+            <div className="mt-4 flex justify-end space-x-4">
+                <button 
+                    onClick={() => onViewRepair(repair)}
+                    className="text-blue-600 hover:text-blue-900 font-medium text-sm"
+                >
+                    ดูรายละเอียด
+                </button>
+                <button
+                    onClick={() => handleDeleteClick(repair)}
+                    className="text-red-600 hover:text-red-900 inline-flex items-center text-sm"
+                    title="ลบรายการ"
+                >
+                    <Trash2 className="h-4 w-4" />
+                </button>
+            </div>
+        </div>
+    );
+
     return (
         <>
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div className="overflow-x-auto">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
@@ -174,11 +226,18 @@ export const RepairsTable: React.FC<RepairsTableProps> = ({
                         </tbody>
                     </table>
                 </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden divide-y divide-gray-200">
+                    {repairs.map((repair) => (
+                        <MobileRepairCard key={repair.id} repair={repair} />
+                    ))}
+                </div>
             </div>
 
             {/* Delete Confirmation Modal */}
             {isDeleteModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
                         <div className="flex justify-between items-start mb-4">
                             <h3 className="text-lg font-medium text-gray-900">
