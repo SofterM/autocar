@@ -125,20 +125,23 @@ const Sidebar: React.FC<SidebarProps> = ({
             <X className="h-5 w-5 text-gray-700" />
           </button>
 
-          {/* Logo Section */}
-          <div className="p-6 border-b border-gray-200">
+          {/* Logo Section - Now clickable */}
+          <button 
+            onClick={() => handleNavigate('/')}
+            className="p-6 border-b border-gray-200 w-full hover:bg-gray-50 transition-colors"
+          >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-50 rounded-lg">
                 <Wrench className="h-6 w-6 text-blue-600" />
               </div>
               {(isSidebarOpen || isMobile) && (
-                <div>
+                <div className="text-left">
                   <h1 className="text-lg font-bold text-gray-900">PowerPuff</h1>
                   <p className="text-sm font-medium text-gray-700">Auto Service</p>
                 </div>
               )}
             </div>
-          </div>
+          </button>
 
           {/* Navigation Menus */}
           <div className="flex-1 px-4 py-6 space-y-6 overflow-y-auto">

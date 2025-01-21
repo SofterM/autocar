@@ -97,9 +97,9 @@ export default function Navbar() {
 
   const menuItems = [
     { name: 'หน้าแรก', path: '/' },
-    { name: 'แดชบอร์ด', path: '/dashboard' },
-    { name: 'รายงาน', path: '/reports' },
-    { name: 'ตั้งค่า', path: '/admin' }
+    { name: 'แดชบอร์ด', path: '/admin' },
+    { name: 'จองคิว', path: '/reports' },
+    { name: 'ช่องทางการติดต่อ', path: '/contact' },
   ]
 
   const unreadNotifications = notifications.filter(n => !n.isRead).length
