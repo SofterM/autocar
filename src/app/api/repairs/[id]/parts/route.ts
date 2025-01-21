@@ -1,17 +1,33 @@
-// src/app/api/repairs/[id]/parts/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { formatBigInt, toBigInt } from '@/lib/db-utils';
+import { RowDataPacket, ResultSetHeader } from 'mysql2';
+
+interface RepairPart extends RowDataPacket {
+    id: bigint;
+    repair_id: bigint;
+    part_id: number;
+    quantity: number;
+    price_per_unit: number;
+    total_price: number;
+    cost_price: number;
+    profit_amount: number;
+    created_at: Date;
+    updated_at: Date;
+    part_name: string;
+    part_code: string;
+    category_name: string;
+}
 
 export async function GET(
     request: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {
-        const { id } = await params;
+        const { id } = params;
         const bigIntId = toBigInt(id);
 
-        const [rows] = await pool.execute(`
+        const [rows] = await pool.execute<RepairPart[]>(`
             SELECT 
                 rp.id,
                 rp.repair_id,
@@ -19,6 +35,8 @@ export async function GET(
                 rp.quantity,
                 rp.price_per_unit,
                 rp.total_price,
+                rp.cost_price,
+                rp.profit_amount,
                 rp.created_at,
                 rp.updated_at,
                 p.name as part_name,
@@ -32,13 +50,15 @@ export async function GET(
             ORDER BY rp.created_at DESC
         `, [bigIntId]);
 
-        const formattedRows = (rows as any[]).map(row => ({
+        const formattedRows = rows.map(row => ({
             ...row,
             id: formatBigInt(row.id),
             repair_id: formatBigInt(row.repair_id),
             part_id: Number(row.part_id),
             price_per_unit: Number(row.price_per_unit),
-            total_price: Number(row.total_price)
+            total_price: Number(row.total_price),
+            cost_price: Number(row.cost_price),
+            profit_amount: Number(row.profit_amount)
         }));
 
         return NextResponse.json(formattedRows);
@@ -58,7 +78,7 @@ export async function POST(
 ) {
     let connection;
     try {
-        const { id } = await params;
+        const { id } = params;
         const bigIntId = toBigInt(id);
         const body = await request.json();
         const { partId, quantity } = body;
@@ -67,12 +87,12 @@ export async function POST(
         await connection.beginTransaction();
 
         // Check repair existence
-        const [repairs] = await connection.execute(
+        const [repairs] = await connection.execute<RowDataPacket[]>(
             'SELECT id FROM repairs WHERE id = ?',
             [bigIntId]
         );
 
-        if ((repairs as any[]).length === 0) {
+        if (repairs.length === 0) {
             return NextResponse.json(
                 { error: `ไม่พบข้อมูลงานซ่อม ID: ${id}` },
                 { status: 404 }
@@ -80,19 +100,19 @@ export async function POST(
         }
 
         // Check part availability
-        const [parts] = await connection.execute(
-            'SELECT id, name, price, stock_quantity FROM parts WHERE id = ?',
+        const [parts] = await connection.execute<RowDataPacket[]>(
+            'SELECT id, name, price, cost, stock_quantity FROM parts WHERE id = ?',
             [partId]
         );
 
-        if ((parts as any[]).length === 0) {
+        if (parts.length === 0) {
             return NextResponse.json(
                 { error: 'ไม่พบข้อมูลอะไหล่' },
                 { status: 404 }
             );
         }
 
-        const part = (parts as any[])[0];
+        const part = parts[0];
 
         if (part.stock_quantity < quantity) {
             return NextResponse.json(
@@ -102,15 +122,18 @@ export async function POST(
         }
 
         const pricePerUnit = Number(part.price);
+        const costPrice = Number(part.cost);
         const totalPrice = pricePerUnit * quantity;
+        const profitAmount = (pricePerUnit - costPrice) * quantity;
 
         // Add repair part
-        const [result] = await connection.execute(
+        const [result] = await connection.execute<ResultSetHeader>(
             `INSERT INTO repair_parts (
                 repair_id, part_id, quantity, 
-                price_per_unit, total_price
-            ) VALUES (?, ?, ?, ?, ?)`,
-            [bigIntId, partId, quantity, pricePerUnit, totalPrice]
+                price_per_unit, total_price,
+                cost_price, profit_amount
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [bigIntId, partId, quantity, pricePerUnit, totalPrice, costPrice, profitAmount]
         );
 
         // Update stock
@@ -139,7 +162,7 @@ export async function POST(
         await connection.commit();
 
         // Get updated repair part
-        const [newRepairPart] = await connection.execute(`
+        const [newRepairPart] = await connection.execute<RepairPart[]>(`
             SELECT 
                 rp.id,
                 rp.repair_id,
@@ -147,6 +170,8 @@ export async function POST(
                 rp.quantity,
                 rp.price_per_unit,
                 rp.total_price,
+                rp.cost_price,
+                rp.profit_amount,
                 rp.created_at,
                 rp.updated_at,
                 p.name as part_name,
@@ -156,15 +181,17 @@ export async function POST(
             JOIN parts p ON rp.part_id = p.id
             LEFT JOIN parts_categories pc ON p.category_id = pc.id
             WHERE rp.id = ?
-        `, [(result as any).insertId]);
+        `, [result.insertId]);
 
         const formattedRepairPart = {
-            ...(newRepairPart as any[])[0],
-            id: formatBigInt((newRepairPart as any[])[0].id),
-            repair_id: formatBigInt((newRepairPart as any[])[0].repair_id),
-            part_id: Number((newRepairPart as any[])[0].part_id),
-            price_per_unit: Number((newRepairPart as any[])[0].price_per_unit),
-            total_price: Number((newRepairPart as any[])[0].total_price)
+            ...newRepairPart[0],
+            id: formatBigInt(newRepairPart[0].id),
+            repair_id: formatBigInt(newRepairPart[0].repair_id),
+            part_id: Number(newRepairPart[0].part_id),
+            price_per_unit: Number(newRepairPart[0].price_per_unit),
+            total_price: Number(newRepairPart[0].total_price),
+            cost_price: Number(newRepairPart[0].cost_price),
+            profit_amount: Number(newRepairPart[0].profit_amount)
         };
 
         return NextResponse.json(formattedRepairPart);
@@ -187,7 +214,7 @@ export async function DELETE(
 ) {
     let connection;
     try {
-        const { id } = await params;
+        const { id } = params;
         const bigIntId = toBigInt(id);
         const body = await request.json();
         const { repairPartId } = body;
@@ -196,19 +223,19 @@ export async function DELETE(
         await connection.beginTransaction();
 
         // Check repair part existence
-        const [repairParts] = await connection.execute(
+        const [repairParts] = await connection.execute<RowDataPacket[]>(
             'SELECT part_id, quantity FROM repair_parts WHERE id = ? AND repair_id = ?',
             [toBigInt(repairPartId), bigIntId]
         );
 
-        if ((repairParts as any[]).length === 0) {
+        if (repairParts.length === 0) {
             return NextResponse.json(
                 { error: 'ไม่พบรายการอะไหล่ที่ต้องการลบ' },
                 { status: 404 }
             );
         }
 
-        const repairPart = (repairParts as any[])[0];
+        const repairPart = repairParts[0];
 
         // Return parts to stock
         await connection.execute(

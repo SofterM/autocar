@@ -1,4 +1,3 @@
-// src/app/api/repairs/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { formatBigInt, toBigInt } from '@/lib/db-utils';
@@ -98,7 +97,6 @@ export async function PATCH(
         connection = await pool.getConnection();
         await connection.beginTransaction();
 
-        // Check if repair exists
         const [repairs] = await connection.execute(
             'SELECT * FROM repairs WHERE id = ?',
             [bigIntId]
@@ -114,7 +112,6 @@ export async function PATCH(
         const updateFields = [];
         const updateValues = [];
 
-        // Build dynamic update query
         if (body.technician_id !== undefined) {
             updateFields.push('technician_id = ?');
             updateValues.push(toBigInt(body.technician_id));
@@ -154,7 +151,6 @@ export async function PATCH(
         if (body.labor_cost !== undefined) {
             updateFields.push('labor_cost = ?');
             updateValues.push(body.labor_cost);
-            // Update total_cost when labor_cost changes
             updateFields.push('total_cost = ? + parts_cost');
             updateValues.push(body.labor_cost);
         }
@@ -166,7 +162,6 @@ export async function PATCH(
             );
         }
 
-        // Execute update query
         const updateQuery = `
             UPDATE repairs 
             SET ${updateFields.join(', ')}
@@ -176,7 +171,6 @@ export async function PATCH(
 
         await connection.commit();
 
-        // Fetch updated repair
         const [updatedRepairs] = await connection.execute(`
             SELECT 
                 r.*,
@@ -218,6 +212,56 @@ export async function PATCH(
         console.error('Error updating repair:', error);
         return NextResponse.json(
             { error: 'เกิดข้อผิดพลาดในการอัปเดตข้อมูล' },
+            { status: 500 }
+        );
+    } finally {
+        if (connection) connection.release();
+    }
+}
+
+export async function DELETE(
+    request: NextRequest,
+    { params }: { params: { id: string } }
+) {
+    let connection;
+    try {
+        const { id } = await params;
+        const bigIntId = toBigInt(id);
+        
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        // Check if repair exists
+        const [repairs] = await connection.execute(
+            'SELECT id FROM repairs WHERE id = ?',
+            [bigIntId]
+        );
+
+        if ((repairs as any[]).length === 0) {
+            return NextResponse.json(
+                { error: 'ไม่พบข้อมูลงานซ่อม' },
+                { status: 404 }
+            );
+        }
+
+        // Delete repair
+        await connection.execute(
+            'DELETE FROM repairs WHERE id = ?',
+            [bigIntId]
+        );
+
+        await connection.commit();
+
+        return NextResponse.json(
+            { message: 'ลบข้อมูลงานซ่อมสำเร็จ' },
+            { status: 200 }
+        );
+
+    } catch (error) {
+        if (connection) await connection.rollback();
+        console.error('Error deleting repair:', error);
+        return NextResponse.json(
+            { error: 'เกิดข้อผิดพลาดในการลบข้อมูล' },
             { status: 500 }
         );
     } finally {
