@@ -9,7 +9,8 @@ import {
     Filter,
     Wrench,
     CircleDollarSign,
-    Clock
+    Clock,
+    CheckCircle
 } from 'lucide-react';
 import Sidebar from '@/components/admin/Sidebar';
 import { AddRepairModal } from '@/components/AddRepairModal';
@@ -97,6 +98,16 @@ export default function RepairsPage() {
         }
     };
 
+    const completedRepairs = repairs.filter(r => r?.status === 'completed');
+    const totalRevenue = completedRepairs.reduce((sum, repair) => sum + (repair?.final_cost || 0), 0);
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('th-TH', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(amount);
+    };
+
     const statistics = [
         {
             title: 'งานซ่อมทั้งหมด',
@@ -120,17 +131,12 @@ export default function RepairsPage() {
             color: 'bg-indigo-500'
         },
         {
-            title: 'รายได้รวม',
-            value: `฿${repairs?.filter(r => r?.status === 'completed')
-                .reduce((sum, repair) => sum + (
-                    (repair?.labor_cost || 0) + 
-                    (repair?.parts_cost || 0)
-                ), 0).toLocaleString()}`,
-            subtitle: 'รายได้จากงานที่เสร็จสิ้น',
-            icon: CircleDollarSign,
+            title: 'รายได้จากงานสำเร็จ',
+            value: `฿${formatCurrency(totalRevenue)}`,
+            subtitle: `${completedRepairs.length} งานที่เสร็จสิ้น`,
+            icon: CheckCircle,
             color: 'bg-emerald-500'
         }
-        
     ];
 
     return (

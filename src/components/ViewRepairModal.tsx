@@ -1,8 +1,7 @@
-// D:\Github\autocar\src\components\ViewRepairModal.tsx
 'use client'
 
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, AlertCircle } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 import { formatDate, formatPhoneNumber, getStatusText, getStatusBadgeStyle } from '@/utils/format';
 import { Repair } from '@/types/repairs';
 import { Part } from '@/types/parts';
@@ -36,7 +35,7 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
   const [estimatedCost, setEstimatedCost] = useState<number>(0);
   const [description, setDescription] = useState<string>('');
 
-  // Calculate totals with proper number handling
+  // Calculate totals
   const partsTotal = repairParts.reduce((sum, part) => sum + Number(part.total_price), 0);
   const totalCost = Number(estimatedCost) + partsTotal;
 
@@ -46,6 +45,12 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
       setDescription(repair.description || '');
       fetchParts();
       fetchRepairParts();
+      
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = 'unset';
+      };
     }
   }, [isOpen, repair]);
 
@@ -127,7 +132,6 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
     try {
       setIsLoading(true);
       
-      // Calculate final costs properly
       const finalPartsTotal = repairParts.reduce((sum, part) => sum + Number(part.total_price), 0);
       const finalTotalCost = Number(estimatedCost) + finalPartsTotal;
       
@@ -136,7 +140,7 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
         estimated_cost: Number(estimatedCost),
         parts_cost: finalPartsTotal,
         description,
-        final_cost: finalTotalCost, // Use the properly calculated total
+        final_cost: finalTotalCost,
         completion_date: newStatus === 'completed' ? new Date().toISOString() : null
       };
       
@@ -148,16 +152,22 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
     }
   };
 
+  const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   if (!isOpen || !repair) return null;
 
   return (
-    <>
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={onClose} />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-        <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-4xl">
-          <div className="flex items-start justify-between p-6 border-b">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm" onClick={handleClickOutside}>
+      <div className="min-h-screen px-4 text-center">
+        <div className="inline-block w-full max-w-4xl text-left align-middle transition-all transform bg-white rounded-2xl shadow-xl my-8">
+          {/* Header */}
+          <div className="flex items-start justify-between p-4 sm:p-6 border-b">
             <div>
-              <h3 className="text-xl font-semibold text-gray-900">รายละเอียดการซ่อม</h3>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900">รายละเอียดการซ่อม</h3>
               <p className="mt-1 text-sm text-gray-500">เลขที่งาน #{repair.id}</p>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
@@ -165,9 +175,10 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
             </button>
           </div>
 
-          <div className="p-6 space-y-8">
+          {/* Content */}
+          <div className="p-4 sm:p-6 space-y-6 sm:space-y-8">
             {/* Customer and Vehicle Info */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div className="space-y-4">
                 <div>
                   <h4 className="text-sm font-medium text-gray-500">ข้อมูลลูกค้า</h4>
@@ -233,7 +244,7 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
 
             {/* Parts Management */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <h4 className="text-lg font-semibold text-gray-900">รายการอะไหล่</h4>
                 <div className="flex gap-2">
                   <input
@@ -241,11 +252,11 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
                     placeholder="ค้นหาอะไหล่..."
                     value={searchPart}
                     onChange={(e) => setSearchPart(e.target.value)}
-                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-md"
+                    className="w-full sm:w-auto px-3 py-1.5 text-sm border border-gray-300 rounded-md"
                   />
                   <button
                     onClick={fetchParts}
-                    className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-md"
+                    className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-md whitespace-nowrap"
                   >
                     ค้นหา
                   </button>
@@ -253,8 +264,8 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
               </div>
 
               {/* Add Part Form */}
-              <div className="grid grid-cols-12 gap-4 items-end bg-gray-50 p-4 rounded-lg">
-                <div className="col-span-6">
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end bg-gray-50 p-4 rounded-lg">
+                <div className="sm:col-span-6">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     เลือกอะไหล่
                   </label>
@@ -271,7 +282,7 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
                     ))}
                   </select>
                 </div>
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     จำนวน
                   </label>
@@ -283,7 +294,7 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                   />
                 </div>
-                <div className="col-span-4">
+                <div className="sm:col-span-4">
                   <button
                     onClick={handleAddPart}
                     disabled={isLoading || !selectedPart}
@@ -296,75 +307,80 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
               </div>
 
               {/* Parts Table */}
-              <div className="border rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">รหัส</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">อะไหล่</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">ราคา/หน่วย</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">จำนวน</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">รวม</th>
-                      <th className="px-4 py-3 w-10"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {repairParts.map((part) => (
-                      <tr key={part.id}>
-                        <td className="px-4 py-3 text-sm text-gray-900">{part.part_code}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">
-                          {part.part_name}
-                          {part.category_name && (
-                            <span className="text-gray-500 text-xs ml-1">
-                              ({part.category_name})
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                          ฿{part.price_per_unit.toLocaleString()}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                          {part.quantity}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                          ฿{part.total_price.toLocaleString()}
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <button
-                            onClick={() => handleRemovePart(part.id)}
-                            disabled={isLoading}
-                            className="text-red-600 hover:text-red-800 disabled:text-red-300"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                    {repairParts.length === 0 && (
-                      <tr>
-                        <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">
-                          ยังไม่มีรายการอะไหล่
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                  <tfoot className="bg-gray-50">
-                    <tr>
-                      <td colSpan={4} className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                        รวมค่าอะไหล่
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                        ฿{partsTotal.toLocaleString()}
-                      </td>
-                      <td></td>
-                    </tr>
-                  </tfoot>
-                </table>
+              <div className="overflow-x-auto">
+                <div className="inline-block min-w-full align-middle">
+                  <div className="border rounded-lg overflow-hidden">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">รหัส</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">อะไหล่</th>
+                          <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">ราคา/หน่วย</th>
+                          <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">จำนวน</th>
+                          <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">รวม</th>
+                          <th className="px-4 py-3 w-10"></th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {repairParts.map((part) => (
+                          <tr key={part.id}>
+                            <td className="px-4 py-3 text-sm text-gray-900">{part.part_code}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {part.part_name}
+                              {part.category_name && (
+                                <span className="text-gray-500 text-xs ml-1">
+                                  ({part.category_name})
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-900 text-right">
+                              ฿{part.price_per_unit.toLocaleString()}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-900 text-right">
+                              {part.quantity}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-900 text-right">
+                              ฿{part.total_price.toLocaleString()}
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <button
+                                onClick={() => handleRemovePart(part.id)}
+                                disabled={isLoading}
+                                className="text-red-600 hover:text-red-800 disabled:text-red-300"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        {repairParts.length === 0 && (
+                          <tr>
+                            <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">
+                              ยังไม่มีรายการอะไหล่
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                      <tfoot className="bg-gray-50">
+                        <tr>
+                          <td colSpan={4} className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
+                            รวมค่าอะไหล่
+                          </td>
+                          <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
+                            ฿{partsTotal.toLocaleString()}
+                          </td>
+                          <td></td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="flex justify-between px-6 py-4 border-t bg-gray-50">
+          {/* Footer */}
+          <div className="flex flex-col sm:flex-row sm:justify-between p-4 sm:px-6 sm:py-4 border-t bg-gray-50 gap-4 sm:gap-0">
             <div className="space-y-1">
               <div className="text-sm text-gray-600">
                 <span className="font-medium">ราคาประเมิน:</span> ฿{Number(estimatedCost).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
@@ -376,17 +392,17 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
                 รวมทั้งหมด: ฿{totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 sm:items-start">
               <button
                 onClick={() => handleStatusChange(repair.status)}
                 disabled={isLoading}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-300"
+                className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-300"
               >
                 {isLoading ? 'กำลังบันทึก...' : 'บันทึก'}
               </button>
               <button
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
               >
                 ปิด
               </button>
@@ -394,6 +410,6 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
