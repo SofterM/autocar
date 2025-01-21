@@ -12,6 +12,7 @@ export interface Vehicle {
 }
 
 export interface Repair {
+    customer_phone: string;
     customer_name: ReactNode;
     parts_cost: number;
     labor_cost: number;
@@ -35,4 +36,5 @@ export interface Repair {
     created_at: string;
     updated_at: string;
     vehicle: Vehicle;
+    completion_date: string | null;
 }

@@ -1,3 +1,4 @@
+// D:\Github\autocar\src\components\ViewRepairModal.tsx
 'use client'
 
 import { useState, useEffect } from 'react';
@@ -5,7 +6,6 @@ import { X, Plus, Trash2, AlertCircle } from 'lucide-react';
 import { formatDate, formatPhoneNumber, getStatusText, getStatusBadgeStyle } from '@/utils/format';
 import { Repair } from '@/types/repairs';
 import { Part } from '@/types/parts';
-import { ReactNode } from 'react';
 
 interface ViewRepairModalProps {
   isOpen: boolean;
@@ -33,9 +33,17 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
   const [selectedPart, setSelectedPart] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
   const [searchPart, setSearchPart] = useState('');
+  const [estimatedCost, setEstimatedCost] = useState<number>(0);
+  const [description, setDescription] = useState<string>('');
+
+  // Calculate totals with proper number handling
+  const partsTotal = repairParts.reduce((sum, part) => sum + Number(part.total_price), 0);
+  const totalCost = Number(estimatedCost) + partsTotal;
 
   useEffect(() => {
     if (isOpen && repair) {
+      setEstimatedCost(repair.estimated_cost || 0);
+      setDescription(repair.description || '');
       fetchParts();
       fetchRepairParts();
     }
@@ -88,7 +96,6 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
       setQuantity(1);
     } catch (error) {
       console.error('Error adding part:', error);
-      // TODO: Show error message to user
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +126,21 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
     
     try {
       setIsLoading(true);
-      await onUpdateRepair(repair.id, { status: newStatus });
+      
+      // Calculate final costs properly
+      const finalPartsTotal = repairParts.reduce((sum, part) => sum + Number(part.total_price), 0);
+      const finalTotalCost = Number(estimatedCost) + finalPartsTotal;
+      
+      const updates: Partial<Repair> = {
+        status: newStatus,
+        estimated_cost: Number(estimatedCost),
+        parts_cost: finalPartsTotal,
+        description,
+        final_cost: finalTotalCost, // Use the properly calculated total
+        completion_date: newStatus === 'completed' ? new Date().toISOString() : null
+      };
+      
+      await onUpdateRepair(repair.id, updates);
     } catch (error) {
       console.error('Error updating status:', error);
     } finally {
@@ -127,69 +148,87 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
     }
   };
 
-  // Calculate totals
-  const partsTotal = repairParts.reduce((sum, part) => sum + part.total_price, 0);
-
   if (!isOpen || !repair) return null;
 
   return (
     <>
-      <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" 
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={onClose} />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-4xl">
-          {/* Header */}
           <div className="flex items-start justify-between p-6 border-b">
             <div>
-              <h3 className="text-xl font-semibold text-gray-900">
-                รายละเอียดการซ่อม
-              </h3>
-              <p className="mt-1 text-sm text-gray-500">
-                เลขที่งาน #{repair.id}
-              </p>
+              <h3 className="text-xl font-semibold text-gray-900">รายละเอียดการซ่อม</h3>
+              <p className="mt-1 text-sm text-gray-500">เลขที่งาน #{repair.id}</p>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
               <X className="h-5 w-5 text-gray-500" />
             </button>
           </div>
 
-          {/* Content */}
           <div className="p-6 space-y-8">
-            {/* Vehicle & Status Info */}
+            {/* Customer and Vehicle Info */}
             <div className="grid grid-cols-2 gap-6">
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">ข้อมูลรถ</h4>
-                <p className="mt-1">
-                  {repair.brand} {repair.model}
-                </p>
-                <p className="text-sm text-gray-500">
-                  ทะเบียน: {repair.license_plate}
-                </p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">สถานะ</h4>
-                <div className="mt-1 flex items-center gap-3">
-                  <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeStyle(repair.status)}`}>
-                    {getStatusText(repair.status)}
-                  </span>
-                  <select
-                    value={repair.status}
-                    onChange={(e) => handleStatusChange(e.target.value as Repair['status'])}
-                    className="text-sm border-gray-300 rounded-md"
-                    disabled={isLoading}
-                  >
-                    <option value="pending">รอดำเนินการ</option>
-                    <option value="in_progress">กำลังซ่อม</option>
-                    <option value="completed">เสร็จสิ้น</option>
-                    <option value="cancelled">ยกเลิก</option>
-                  </select>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">ข้อมูลลูกค้า</h4>
+                  <p className="mt-1 font-medium">{repair.customer?.name}</p>
+                  <p className="text-sm text-gray-500">โทร: {formatPhoneNumber(repair.customer?.phone)}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">ข้อมูลรถ</h4>
+                  <p className="mt-1">{repair.brand} {repair.model}</p>
+                  <p className="text-sm text-gray-500">ทะเบียน: {repair.license_plate}</p>
+                  <p className="text-sm text-gray-500">เลขไมล์: {repair.mileage?.toLocaleString()} กม.</p>
                 </div>
               </div>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">วันที่</h4>
+                  <p className="mt-1">วันรับรถ: {formatDate(repair.start_date)}</p>
+                  <p className="text-sm text-gray-500">นัดรับรถ: {repair.expected_end_date ? formatDate(repair.expected_end_date) : '-'}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">สถานะ</h4>
+                  <div className="mt-1 flex items-center gap-3">
+                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeStyle(repair.status)}`}>
+                      {getStatusText(repair.status)}
+                    </span>
+                    <select
+                      value={repair.status}
+                      onChange={(e) => handleStatusChange(e.target.value as Repair['status'])}
+                      className="text-sm border-gray-300 rounded-md"
+                      disabled={isLoading}
+                    >
+                      <option value="pending">รอดำเนินการ</option>
+                      <option value="in_progress">กำลังซ่อม</option>
+                      <option value="completed">เสร็จสิ้น</option>
+                      <option value="cancelled">ยกเลิก</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Repair Details */}
+            <div>
+              <h4 className="text-sm font-medium text-gray-500 mb-2">อาการ/ปัญหา</h4>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md"
+                rows={3}
+              />
+            </div>
+
+            {/* Cost Estimates */}
+            <div>
+              <h4 className="text-sm font-medium text-gray-500">ราคาประเมิน</h4>
+              <input
+                type="number"
+                value={estimatedCost}
+                onChange={(e) => setEstimatedCost(Number(e.target.value))}
+                className="mt-1 px-3 py-2 border rounded-md w-full"
+              />
             </div>
 
             {/* Parts Management */}
@@ -325,15 +364,33 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="flex justify-end gap-3 px-6 py-4 border-t">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 
-                       rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              ปิด
-            </button>
+          <div className="flex justify-between px-6 py-4 border-t bg-gray-50">
+            <div className="space-y-1">
+              <div className="text-sm text-gray-600">
+                <span className="font-medium">ราคาประเมิน:</span> ฿{Number(estimatedCost).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+              </div>
+              <div className="text-sm text-gray-600">
+                <span className="font-medium">ค่าอะไหล่รวม:</span> ฿{partsTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+              </div>
+              <div className="text-base font-medium text-gray-900">
+                รวมทั้งหมด: ฿{totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleStatusChange(repair.status)}
+                disabled={isLoading}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-300"
+              >
+                {isLoading ? 'กำลังบันทึก...' : 'บันทึก'}
+              </button>
+              <button
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                ปิด
+              </button>
+            </div>
           </div>
         </div>
       </div>
