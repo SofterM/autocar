@@ -1,17 +1,19 @@
-// app/admin/employees/page.tsx
 'use client'
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Menu } from 'lucide-react';
 import { User, Technician } from '@/types';
 import AddTechnicianModal from '@/components/AddTechnicianModal';
+import EditTechnicianModal from '@/components/EditTechnicianModal';
 import Sidebar from '@/components/admin/Sidebar';
 
 export default function EmployeesPage() {
     const [technicians, setTechnicians] = useState<Technician[]>([]);
     const [users, setUsers] = useState<User[]>([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [, setIsLoading] = useState(true);
+    const [selectedTechnician, setSelectedTechnician] = useState<Technician | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -60,6 +62,17 @@ export default function EmployeesPage() {
         }
     };
 
+    const handleEditClick = (technician: Technician) => {
+        setSelectedTechnician(technician);
+        setIsEditModalOpen(true);
+    };
+
+    const handleEditSuccess = () => {
+        setIsEditModalOpen(false);
+        setSelectedTechnician(null);
+        fetchTechnicians();
+    };
+
     const filteredTechnicians = technicians.filter(tech => 
         tech.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         tech.position.toLowerCase().includes(searchTerm.toLowerCase())
@@ -72,6 +85,7 @@ export default function EmployeesPage() {
                 setIsSidebarOpen={setIsSidebarOpen}
                 activeMenu="จัดการพนักงาน" 
             />
+            
             <div className="flex-1">
                 <header className="bg-white border-b border-gray-200">
                     <div className="px-4 sm:px-6 lg:px-8 py-4">
@@ -168,7 +182,10 @@ export default function EmployeesPage() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <button className="text-blue-600 hover:text-blue-900">
+                                                <button 
+                                                    onClick={() => handleEditClick(technician)}
+                                                    className="text-blue-600 hover:text-blue-900"
+                                                >
                                                     แก้ไข
                                                 </button>
                                             </td>
@@ -187,6 +204,7 @@ export default function EmployeesPage() {
                     </div>
                 </main>
 
+                {/* Modals */}
                 <AddTechnicianModal
                     isOpen={isAddModalOpen}
                     onClose={() => setIsAddModalOpen(false)}
@@ -195,6 +213,15 @@ export default function EmployeesPage() {
                         fetchTechnicians();
                     }}
                     users={users}
+                />
+                <EditTechnicianModal
+                    isOpen={isEditModalOpen}
+                    onClose={() => {
+                        setIsEditModalOpen(false);
+                        setSelectedTechnician(null);
+                    }}
+                    onSuccess={handleEditSuccess}
+                    technician={selectedTechnician}
                 />
             </div>
         </div>
