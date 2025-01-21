@@ -1,3 +1,4 @@
+// D:\Github\autocar\src\app\api\repairs\[id]\parts\route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { formatBigInt, toBigInt } from '@/lib/db-utils';
@@ -21,11 +22,11 @@ interface RepairPart extends RowDataPacket {
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: { id: string } }
 ) {
     try {
-        const { id } = params;
-        const bigIntId = toBigInt(id);
+        const params = await Promise.resolve(context.params);
+        const bigIntId = toBigInt(params.id);
 
         const [rows] = await pool.execute<RepairPart[]>(`
             SELECT 
@@ -74,12 +75,12 @@ export async function GET(
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: { id: string } }
 ) {
     let connection;
     try {
-        const { id } = params;
-        const bigIntId = toBigInt(id);
+        const params = await Promise.resolve(context.params);
+        const bigIntId = toBigInt(params.id);
         const body = await request.json();
         const { partId, quantity } = body;
 
@@ -94,7 +95,7 @@ export async function POST(
 
         if (repairs.length === 0) {
             return NextResponse.json(
-                { error: `ไม่พบข้อมูลงานซ่อม ID: ${id}` },
+                { error: `ไม่พบข้อมูลงานซ่อม ID: ${params.id}` },
                 { status: 404 }
             );
         }
@@ -210,12 +211,12 @@ export async function POST(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: { id: string } }
 ) {
     let connection;
     try {
-        const { id } = params;
-        const bigIntId = toBigInt(id);
+        const params = await Promise.resolve(context.params);
+        const bigIntId = toBigInt(params.id);
         const body = await request.json();
         const { repairPartId } = body;
 

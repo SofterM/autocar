@@ -244,7 +244,29 @@ export async function DELETE(
             );
         }
 
-        // Delete repair
+        // 1. First, get all repair parts for this repair
+        const [repairParts] = await connection.execute(
+            'SELECT id, part_id, quantity FROM repair_parts WHERE repair_id = ?',
+            [bigIntId]
+        );
+
+        // 2. Return parts to inventory
+        for (const part of repairParts as any[]) {
+            await connection.execute(
+                'UPDATE parts SET stock_quantity = stock_quantity + ? WHERE id = ?',
+                [part.quantity, part.part_id]
+            );
+        }
+
+        // 3. Delete repair parts
+        if ((repairParts as any[]).length > 0) {
+            await connection.execute(
+                'DELETE FROM repair_parts WHERE repair_id = ?',
+                [bigIntId]
+            );
+        }
+
+        // 4. Finally delete the repair
         await connection.execute(
             'DELETE FROM repairs WHERE id = ?',
             [bigIntId]

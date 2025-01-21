@@ -98,6 +98,30 @@ export default function RepairsPage() {
         }
     };
 
+    const handleDeleteRepair = async (repair: Repair) => {
+        try {
+            const response = await fetch(`/api/repairs/${repair.id}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to delete repair');
+            }
+
+            // Refresh the repairs list after successful deletion
+            await fetchRepairs();
+            
+            // If the deleted repair was selected, close its modal
+            if (selectedRepair?.id === repair.id) {
+                setSelectedRepair(null);
+            }
+        } catch (error: any) {
+            console.error('Error deleting repair:', error);
+            throw new Error(error.message || 'เกิดข้อผิดพลาดในการลบข้อมูล');
+        }
+    };
+
     const completedRepairs = repairs.filter(r => r?.status === 'completed');
     const totalRevenue = completedRepairs.reduce((sum, repair) => sum + (repair?.final_cost || 0), 0);
 
@@ -242,6 +266,7 @@ export default function RepairsPage() {
                         isLoading={isLoading}
                         onViewRepair={(repair) => setSelectedRepair(repair)}
                         onAddRepair={() => setIsAddModalOpen(true)}
+                        onDeleteRepair={handleDeleteRepair}
                     />
                 </main>
             </div>
