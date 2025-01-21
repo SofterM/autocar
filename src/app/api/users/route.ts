@@ -10,7 +10,6 @@ export async function GET(req: Request) {
         let query = 'SELECT id, email, first_name, last_name, role, phone FROM users WHERE 1=1';
         const params: any[] = [];
 
-        // ไม่แสดงผู้ใช้ที่เป็นช่างแล้ว หรือช่างที่ถูกปิดการใช้งาน
         query += ` AND NOT EXISTS (
             SELECT 1 FROM technicians t 
             WHERE t.user_id = users.id AND t.status = 'active'

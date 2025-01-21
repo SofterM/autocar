@@ -19,7 +19,7 @@ import Sidebar from '@/components/admin/Sidebar';
 import { AddRepairModal } from '@/components/AddRepairModal';
 import { Repair } from '@/types/repairs';
 import { User } from '@/types/user';
-import { formatDate, formatPhoneNumber, getStatusText, getStatusBadgeStyle } from '@/utils/format';
+import { getStatusText, getStatusBadgeStyle } from '@/utils/format';
 
 const AdminDashboard = () => {
   const router = useRouter();

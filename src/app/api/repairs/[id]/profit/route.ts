@@ -1,3 +1,4 @@
+// D:\Github\autocar\src\app\api\repairs\[id]\profit\route.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import pool from '@/lib/db';

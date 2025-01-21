@@ -77,13 +77,13 @@ const Sidebar: React.FC<SidebarProps> = ({
         },
         { 
           icon: BarChart3, 
-          label: 'รายงาน',
+          label: 'รายงานการเงิน',
           path: '/admin/reports',
         },
         { 
           icon: MessageSquare, 
-          label: 'รีวิวและคะแนน',
-          path: '/admin/reviews',
+          label: 'ช่องทางการติดต่อ',
+          path: '/admin/contects',
         },
       ]
     }
