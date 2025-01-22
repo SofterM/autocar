@@ -98,7 +98,7 @@ export default function Navbar() {
   const menuItems = [
     { name: 'หน้าแรก', path: '/' },
     { name: 'แดชบอร์ด', path: '/admin' },
-    { name: 'จองคิว', path: '/reports' },
+    { name: 'จองคิว', path: '/appointment' },
     { name: 'ช่องทางการติดต่อ', path: '/contact' },
   ]
 

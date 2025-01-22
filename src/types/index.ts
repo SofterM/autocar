@@ -17,3 +17,12 @@ export interface Technician {
     created_at: string;
     updated_at: string;
 }
+
+interface Appointment {
+    id: number;
+    user_id: number;
+    service: string;
+    appointment_date: string;
+    appointment_time: string;
+    status: string;
+  }
