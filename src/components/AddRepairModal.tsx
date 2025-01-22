@@ -1,4 +1,3 @@
-// components/AddRepairModal.tsx
 'use client'
 
 import React, { useState, useEffect } from 'react';
@@ -36,8 +35,17 @@ export const AddRepairModal: React.FC<AddRepairModalProps> = ({
         customerPhone: '',
         customerEmail: '',
         technicianId: '',
-        estimatedCost: ''
+        estimatedCost: '',
+        category: 'engine_repair'
     });
+
+    const categories = [
+        { id: 'engine_repair', name: 'ซ่อมเครื่องยนต์' },
+        { id: 'parts_replacement', name: 'เปลี่ยนอะไหล่' },
+        { id: 'maintenance', name: 'ตรวจเช็คระยะ' },
+        { id: 'electrical_repair', name: 'ซ่อมระบบไฟฟ้า' },
+        { id: 'others', name: 'อื่นๆ' }
+    ];
 
     useEffect(() => {
         fetchTechnicians();
@@ -84,7 +92,6 @@ export const AddRepairModal: React.FC<AddRepairModalProps> = ({
             onClose();
         } catch (error) {
             console.error('Error creating repair:', error);
-            // You might want to show an error message to the user here
         } finally {
             setIsLoading(false);
         }
@@ -192,7 +199,8 @@ export const AddRepairModal: React.FC<AddRepairModalProps> = ({
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         เลขทะเบียน
                                     </label>
-                                    <input type="text"
+                                    <input 
+                                        type="text"
                                         required
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                         value={formData.licensePlate}
@@ -273,7 +281,25 @@ export const AddRepairModal: React.FC<AddRepairModalProps> = ({
                                     />
                                 </div>
 
-                                <div className="md:col-span-2">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        หมวดหมู่งานซ่อม
+                                    </label>
+                                    <select
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                        value={formData.category}
+                                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                        required
+                                    >
+                                        {categories.map((category) => (
+                                            <option key={category.id} value={category.id}>
+                                                {category.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         ช่างผู้รับผิดชอบ
                                     </label>

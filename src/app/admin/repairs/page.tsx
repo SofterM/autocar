@@ -1,8 +1,6 @@
-// src/app/admin/repairs/page.tsx
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation'; // เพิ่ม import useRouter
 import {
     Search,
     Plus,
@@ -11,39 +9,18 @@ import {
     Filter,
     Wrench,
     CircleDollarSign,
-    Clock} from 'lucide-react';
+    Clock,
+    CheckCircle
+} from 'lucide-react';
 import Sidebar from '@/components/admin/Sidebar';
 import { AddRepairModal } from '@/components/AddRepairModal';
-
-interface Repair {
-    id: string;
-    brand: string;
-    model: string;
-    license_plate: string;
-    mileage: number;
-    start_date: string;
-    expected_end_date: string | null;
-    actual_end_date: string | null;
-    status: string;
-    estimated_cost: number;
-    final_cost: number | null;
-    description: string;
-    customer: {
-        id: string;
-        name: string;
-        email: string | null;
-        phone: string;
-    };
-    technician: {
-        id: string;
-        name: string;
-        position: string;
-    } | null;
-}
+import { ViewRepairModal } from '@/components/ViewRepairModal';
+import { RepairsTable } from '@/components/RepairsTable';
+import { Repair } from '@/types/repairs';
 
 export default function RepairsPage() {
-    const router = useRouter();
     const [repairs, setRepairs] = useState<Repair[]>([]);
+    const [selectedRepair, setSelectedRepair] = useState<Repair | null>(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isFiltersVisible, setIsFiltersVisible] = useState(false);
@@ -52,9 +29,6 @@ export default function RepairsPage() {
         search: '',
         status: 'all'
     });
-    const handleViewDetail = (repairId: string) => {
-        router.push(`/admin/repairs/${repairId}`);
-    };
 
     useEffect(() => {
         const handleResize = () => {
@@ -85,11 +59,9 @@ export default function RepairsPage() {
 
             const response = await fetch(`/api/repairs?${searchParams.toString()}`);
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Failed to fetch repairs');
+                throw new Error('Failed to fetch repairs');
             }
             const data = await response.json();
-            console.log('Fetched repairs:', data);
             setRepairs(data || []);
         } catch (error) {
             console.error('Error fetching repairs:', error);
@@ -99,88 +71,97 @@ export default function RepairsPage() {
         }
     };
 
-    // คำนวณสถิติ
-    const totalRepairs = repairs.length;
-    const pendingRepairs = repairs.filter(r => r.status === 'pending').length;
-    const inProgressRepairs = repairs.filter(r => r.status === 'in_progress').length;
-    const totalRevenue = repairs
-        .filter(r => r.status === 'completed')
-        .reduce((sum, repair) => sum + (repair.final_cost || 0), 0);
+    const handleUpdateRepair = async (repairId: number, updates: Partial<Repair>) => {
+        try {
+            const response = await fetch(`/api/repairs/${repairId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updates),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update repair');
+            }
+
+            await fetchRepairs();
+
+            if (selectedRepair && selectedRepair.id === repairId) {
+                const updatedRepair = await response.json();
+                setSelectedRepair(updatedRepair);
+            }
+
+        } catch (error) {
+            console.error('Error updating repair:', error);
+            throw error;
+        }
+    };
+
+    const handleDeleteRepair = async (repair: Repair) => {
+        try {
+            const response = await fetch(`/api/repairs/${repair.id}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to delete repair');
+            }
+
+            // Refresh the repairs list after successful deletion
+            await fetchRepairs();
+            
+            // If the deleted repair was selected, close its modal
+            if (selectedRepair?.id === repair.id) {
+                setSelectedRepair(null);
+            }
+        } catch (error: any) {
+            console.error('Error deleting repair:', error);
+            throw new Error(error.message || 'เกิดข้อผิดพลาดในการลบข้อมูล');
+        }
+    };
+
+    const completedRepairs = repairs.filter(r => r?.status === 'completed');
+    const totalRevenue = completedRepairs.reduce((sum, repair) => sum + (repair?.final_cost || 0), 0);
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('th-TH', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(amount);
+    };
 
     const statistics = [
         {
             title: 'งานซ่อมทั้งหมด',
-            value: totalRepairs,
+            value: repairs?.length || 0,
             subtitle: 'งานในระบบ',
             icon: Wrench,
             color: 'bg-blue-500'
         },
         {
             title: 'รอดำเนินการ',
-            value: pendingRepairs,
+            value: repairs?.filter(r => r?.status === 'pending')?.length || 0,
             subtitle: 'งานที่ยังไม่เริ่ม',
             icon: Clock,
             color: 'bg-amber-500'
         },
         {
             title: 'กำลังดำเนินการ',
-            value: inProgressRepairs,
+            value: repairs?.filter(r => r?.status === 'in_progress')?.length || 0,
             subtitle: 'งานที่กำลังซ่อม',
             icon: Wrench,
             color: 'bg-indigo-500'
         },
         {
-            title: 'รายได้รวม',
-            value: `฿${totalRevenue.toLocaleString()}`,
-            subtitle: 'รายได้จากงานที่เสร็จสิ้น',
-            icon: CircleDollarSign,
+            title: 'รายได้จากงานสำเร็จ',
+            value: `฿${formatCurrency(totalRevenue)}`,
+            subtitle: `${completedRepairs.length} งานที่เสร็จสิ้น`,
+            icon: CheckCircle,
             color: 'bg-emerald-500'
         }
     ];
-
-    const getStatusBadgeStyle = (status: string) => {
-        switch (status) {
-            case 'pending':
-                return 'border border-amber-200 bg-amber-50 text-amber-700';
-            case 'in_progress':
-                return 'border border-blue-200 bg-blue-50 text-blue-700';
-            case 'completed':
-                return 'border border-emerald-200 bg-emerald-50 text-emerald-700';
-            case 'cancelled':
-                return 'border border-red-200 bg-red-50 text-red-700';
-            default:
-                return 'border border-gray-200 bg-gray-50 text-gray-700';
-        }
-    };
-
-    const getStatusText = (status: string) => {
-        switch (status) {
-            case 'pending':
-                return 'รอดำเนินการ';
-            case 'in_progress':
-                return 'กำลังซ่อม';
-            case 'completed':
-                return 'เสร็จสิ้น';
-            case 'cancelled':
-                return 'ยกเลิก';
-            default:
-                return status;
-        }
-    };
-
-    const formatPhoneNumber = (phone: string | null) => {
-        if (!phone) return '-';
-        return phone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-    };
-
-    const formatDate = (dateString: string) => {
-        const options: Intl.DateTimeFormatOptions = {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        };
-        return new Date(dateString).toLocaleDateString('th-TH', options);
-    };
 
     return (
         <div className="flex min-h-screen bg-gray-100">
@@ -203,7 +184,7 @@ export default function RepairsPage() {
                             <div className="flex items-center gap-2">
                                 <h1 className="text-lg lg:text-xl font-bold text-gray-900">งานซ่อม</h1>
                                 <span className="hidden sm:inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                                    {repairs.length} รายการ
+                                    {repairs?.length || 0} รายการ
                                 </span>
                             </div>
                         </div>
@@ -226,7 +207,7 @@ export default function RepairsPage() {
                     {/* Statistics Cards */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         {statistics.map((stat, index) => (
-                            <div key={`stat-${index}`} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 lg:p-6">
+                            <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 lg:p-6">
                                 <div className="flex items-center justify-between">
                                     <span className={`p-3 rounded-xl ${stat.color} text-white`}>
                                         <stat.icon className="h-5 w-5 lg:h-6 lg:w-6" />
@@ -280,102 +261,13 @@ export default function RepairsPage() {
                     </div>
 
                     {/* Repairs Table */}
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">รถยนต์</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ลูกค้า</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ช่างซ่อม</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">วันที่รับรถ</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">สถานะ</th>
-                                        <th scope="col" className="relative px-6 py-3">
-                                            <span className="sr-only">Actions</span>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {repairs.map((repair) => (
-                                        <tr key={repair.id} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4">
-                                                <div>
-                                                    <div className="font-medium text-gray-900">
-                                                        {repair.brand} {repair.model}
-                                                    </div>
-                                                    <div className="text-sm text-gray-500">
-                                                        {repair.license_plate}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div>
-                                                    <div className="font-medium text-gray-900">
-                                                        {repair.customer.name}
-                                                    </div>
-                                                    <div className="text-sm text-gray-500">
-                                                        {formatPhoneNumber(repair.customer.phone)}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div>
-                                                    <div className="font-medium text-gray-900">
-                                                        {repair.technician?.name || '-'}
-                                                    </div>
-                                                    <div className="text-sm text-gray-500">
-                                                        {repair.technician?.position || '-'}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-gray-900">
-                                                {formatDate(repair.start_date)}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${getStatusBadgeStyle(repair.status)}`}>
-                                                    {getStatusText(repair.status)}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-right text-sm">
-                                                <button
-                                                    onClick={() => handleViewDetail(repair.id)}
-                                                    className="text-blue-600 hover:text-blue-900 font-medium inline-flex items-center gap-1"
-                                                >
-                                                    ดูรายละเอียด
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    {/* Empty State */}
-                    {repairs.length === 0 && !isLoading && (
-                        <div className="text-center py-12">
-                            <Wrench className="mx-auto h-12 w-12 text-gray-400" />
-                            <h3 className="mt-4 text-lg font-medium text-gray-900">ไม่พบรายการซ่อม</h3>
-                            <p className="mt-2 text-sm text-gray-500">เริ่มต้นสร้างรายการซ่อมใหม่</p>
-                            <div className="mt-6">
-                                <button
-                                    onClick={() => setIsAddModalOpen(true)}
-                                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                                >
-                                    <Plus className="h-5 w-5 mr-2" />
-                                    สร้างงานใหม่
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Loading State */}
-                    {isLoading && (
-                        <div className="text-center py-12">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                            <p className="mt-4 text-sm text-gray-500">กำลังโหลดข้อมูล...</p>
-                        </div>
-                    )}
+                    <RepairsTable
+                        repairs={repairs}
+                        isLoading={isLoading}
+                        onViewRepair={(repair) => setSelectedRepair(repair)}
+                        onAddRepair={() => setIsAddModalOpen(true)}
+                        onDeleteRepair={handleDeleteRepair}
+                    />
                 </main>
             </div>
 
@@ -387,6 +279,12 @@ export default function RepairsPage() {
                     setIsAddModalOpen(false);
                     fetchRepairs();
                 }}
+            />
+            <ViewRepairModal
+                isOpen={!!selectedRepair}
+                onClose={() => setSelectedRepair(null)}
+                repair={selectedRepair}
+                onUpdateRepair={handleUpdateRepair}
             />
         </div>
     );

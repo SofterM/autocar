@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 // types/repairs.ts
 export interface Vehicle {
     id: number;
@@ -10,6 +12,20 @@ export interface Vehicle {
 }
 
 export interface Repair {
+    category: string;
+    technician: any;
+    customer_phone: string;
+    customer_name: ReactNode;
+    parts_cost: number;
+    labor_cost: number;
+    expected_completion_date(expected_completion_date: any): ReactNode;
+    mechanic: any;
+    final_cost: any;
+    estimated_cost: any;
+    customer: any;
+    license_plate: ReactNode;
+    model: ReactNode;
+    brand: ReactNode;
     id: number;
     vehicle_id: number;
     mileage: number;
@@ -22,4 +38,5 @@ export interface Repair {
     created_at: string;
     updated_at: string;
     vehicle: Vehicle;
+    completion_date: string | null;
 }

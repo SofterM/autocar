@@ -14,11 +14,22 @@ import {
   ArrowUpRight,
   ArrowDownRight
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/admin/Sidebar';
+import { AddRepairModal } from '@/components/AddRepairModal';
+import { Repair } from '@/types/repairs';
+import { User } from '@/types/user';
+import { getStatusText, getStatusBadgeStyle } from '@/utils/format';
 
 const AdminDashboard = () => {
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [userData, setUserData] = useState({ email: '', firstName: '', lastName: '' });
+  const [repairs, setRepairs] = useState<Repair[]>([]);
+  const [recentRepairs, setRecentRepairs] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const userStr = localStorage.getItem('user');
@@ -31,10 +42,8 @@ const AdminDashboard = () => {
       });
     }
 
-    // Set initial sidebar state based on screen size
     setIsSidebarOpen(window.innerWidth >= 1024);
 
-    // Handle resize events
     const handleResize = () => {
       setIsSidebarOpen(window.innerWidth >= 1024);
     };
@@ -43,10 +52,97 @@ const AdminDashboard = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    fetchInitialData();
+  }, []);
+
+  const fetchInitialData = async () => {
+    try {
+      setIsLoading(true);
+      await Promise.all([fetchRepairs(), fetchUsers()]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('/api/users');
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
+  const fetchRepairs = async () => {
+    try {
+      const response = await fetch('/api/repairs');
+      if (response.ok) {
+        const data = await response.json();
+        setRepairs(data || []);
+        setRecentRepairs(getRecentRepairs(data));
+      }
+    } catch (error) {
+      console.error('Error fetching repairs:', error);
+    }
+  };
+
+  const getTimeLeft = (repair: Repair) => {
+    if (repair.status === 'completed') return 'เสร็จสิ้น';
+    if (repair.status === 'cancelled') return 'ยกเลิก';
+    
+    if (repair.expected_end_date) {
+      const expectedDate = new Date(repair.expected_end_date);
+      const now = new Date();
+      const diffTime = expectedDate.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
+      
+      if (diffDays > 1) return `ครบกำหนดในอีก ${diffDays} วัน`;
+      if (diffHours > 0) return `ครบกำหนดในอีก ${diffHours} ชั่วโมง`;
+      return 'เกินกำหนด';
+    }
+    
+    return 'ไม่ระบุ';
+  };
+
+  const getRecentRepairs = (repairs: Repair[]) => {
+    return repairs
+      .sort((a: Repair, b: Repair) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+      .slice(0, 3)
+      .map((repair: Repair) => ({
+        id: repair.id,
+        customer: repair.customer?.name,
+        carModel: `${repair.brand} ${repair.model}`,
+        service: repair.description,
+        license_plate: repair.license_plate,
+        status: getStatusText(repair.status),
+        statusColor: getStatusBadgeStyle(repair.status),
+        assignedTo: repair.technician?.name ? `ช่าง${repair.technician.name}` : 'ยังไม่กำหนด',
+        timeLeft: getTimeLeft(repair)
+      }));
+  };
+
+  const completedRepairs = repairs.filter(r => r?.status === 'completed');
+  const totalRevenue = completedRepairs.reduce((sum, repair) => sum + (repair?.final_cost || 0), 0);
+  const pendingRepairs = repairs.filter(r => r?.status === 'pending').length;
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('th-TH', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
+
   const statistics = [
     {
       title: 'รายได้ประจำเดือน',
-      value: '฿142,384',
+      value: `฿${formatCurrency(totalRevenue)}`,
       trend: '+12.5%',
       isUp: true,
       icon: CircleDollarSign,
@@ -54,60 +150,27 @@ const AdminDashboard = () => {
     },
     {
       title: 'งานซ่อมทั้งหมด',
-      value: '284',
+      value: repairs.length.toString(),
       trend: '+8.2%',
       isUp: true,
       icon: Wrench,
       color: 'bg-purple-500'
     },
     {
-      title: 'เวลาเฉลี่ยต่องาน',
-      value: '2.4 ชม.',
+      title: 'รอดำเนินการ',
+      value: pendingRepairs.toString(),
       trend: '-5.1%',
       isUp: false,
       icon: Clock,
-      color: 'bg-emerald-500'
+      color: 'bg-amber-500'
     },
     {
-      title: 'ลูกค้าใหม่',
-      value: '38',
+      title: 'ผู้ใช้งานทั้งหมด',
+      value: users.length.toString(),
       trend: '+3.7%',
       isUp: true,
       icon: Users,
-      color: 'bg-orange-500'
-    }
-  ];
-
-  const recentRepairs = [
-    {
-      id: 1,
-      customer: 'คุณวิศรุต มั่นคง',
-      carModel: 'Toyota Camry 2.5G',
-      service: 'เช็คระยะ 40,000 กม.',
-      status: 'กำลังดำเนินการ',
-      statusColor: 'text-amber-500 bg-amber-50',
-      assignedTo: 'ช่างพิชัย',
-      timeLeft: '3 ชั่วโมง',
-    },
-    {
-      id: 2,
-      customer: 'คุณนภัสสร ดวงดี',
-      carModel: 'Honda Civic e:HEV',
-      service: 'ตรวจสอบระบบไฟฟ้า',
-      status: 'รอดำเนินการ',
-      statusColor: 'text-blue-500 bg-blue-50',
-      assignedTo: 'ช่างสมศักดิ์',
-      timeLeft: '1 วัน',
-    },
-    {
-      id: 3,
-      customer: 'คุณธนกฤต วงศ์สุข',
-      carModel: 'MG ZS EV',
-      service: 'อัพเดทซอฟต์แวร์',
-      status: 'เสร็จสิ้น',
-      statusColor: 'text-emerald-500 bg-emerald-50',
-      assignedTo: 'ช่างวิศิษฐ์',
-      timeLeft: 'เสร็จแล้ว',
+      color: 'bg-emerald-500'
     }
   ];
 
@@ -134,6 +197,15 @@ const AdminDashboard = () => {
       type: 'ซ่อมด่วน'
     }
   ];
+
+  const handleCreateNewRepair = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleAddRepairSuccess = () => {
+    setIsAddModalOpen(false);
+    fetchRepairs();
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -190,7 +262,10 @@ const AdminDashboard = () => {
                 <h1 className="text-xl lg:text-2xl font-bold text-gray-900">ยินดีต้อนรับ, คุณ{userData.firstName}</h1>
                 <p className="text-sm lg:text-base text-gray-600">นี่คือภาพรวมของระบบในวันที่ {new Date().toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
               </div>
-              <button className="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+              <button 
+                onClick={handleCreateNewRepair}
+                className="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              >
                 + สร้างงานใหม่
               </button>
             </div>
@@ -230,7 +305,10 @@ const AdminDashboard = () => {
                 <div className="p-4 lg:p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-lg font-bold text-gray-900">งานซ่อมล่าสุด</h2>
-                    <button className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
+                    <button 
+                      onClick={() => router.push('/admin/repairs')}
+                      className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                    >
                       ดูทั้งหมด
                     </button>
                   </div>
@@ -242,57 +320,64 @@ const AdminDashboard = () => {
                           <p className="text-sm text-gray-600">{repair.carModel}</p>
                           <div className="flex items-center gap-2 text-sm flex-wrap">
                             <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${repair.statusColor}`}>
-                              {repair.status}
-                            </span>
-                            <span className="text-gray-500">• {repair.assignedTo}</span>
-                          </div>
-                        </div>
-                        <div className="text-left sm:text-right">
-                          <p className="text-sm font-medium text-gray-900">{repair.service}</p>
-                          <p className="text-sm text-gray-500 mt-1">{repair.timeLeft}</p>
+                            {repair.status}
+                          </span>
+                          <span className="text-gray-500">• {repair.assignedTo}</span>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      <div className="text-left sm:text-right">
+                        <p className="text-sm font-medium text-gray-900">{repair.service || '-'}</p>
+                        <p className="text-sm text-gray-500 mt-1">{repair.timeLeft}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
+            </div>
 
-              {/* Upcoming Appointments */}
-              <div className="bg-white rounded-xl shadow-sm">
-                <div className="p-4 lg:p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-lg font-bold text-gray-900">นัดหมายวันนี้</h2>
-                    <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                      <Calendar className="h-5 w-5 text-gray-500" />
-                    </button>
-                  </div>
-                  <div className="space-y-6">
-                    {upcomingAppointments.map((appointment) => (
-                      <div key={appointment.id} className="flex gap-4">
-                        <div className="w-16 py-2 px-3 bg-indigo-50 rounded-lg text-center flex-shrink-0">
-                          <p className="text-sm font-semibold text-indigo-600">{appointment.time}</p>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-900 truncate">{appointment.customer}</p>
-                          <p className="text-sm text-gray-600 truncate">{appointment.service}</p>
-                          <span className="inline-block mt-1 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
-                            {appointment.type}
-                          </span>
-                        </div>
-                        <button className="self-center p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0">
-                          <ChevronRight className="h-5 w-5 text-gray-400" />
-                        </button>
+            {/* Upcoming Appointments */}
+            <div className="bg-white rounded-xl shadow-sm">
+              <div className="p-4 lg:p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-bold text-gray-900">นัดหมายวันนี้</h2>
+                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <Calendar className="h-5 w-5 text-gray-500" />
+                  </button>
+                </div>
+                <div className="space-y-6">
+                  {upcomingAppointments.map((appointment) => (
+                    <div key={appointment.id} className="flex gap-4">
+                      <div className="w-16 py-2 px-3 bg-indigo-50 rounded-lg text-center flex-shrink-0">
+                        <p className="text-sm font-semibold text-indigo-600">{appointment.time}</p>
                       </div>
-                    ))}
-                  </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 truncate">{appointment.customer}</p>
+                        <p className="text-sm text-gray-600 truncate">{appointment.service}</p>
+                        <span className="inline-block mt-1 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
+                          {appointment.type}
+                        </span>
+                      </div>
+                      <button className="self-center p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0">
+                        <ChevronRight className="h-5 w-5 text-gray-400" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
-  );
+
+    {/* Modals */}
+    <AddRepairModal
+      isOpen={isAddModalOpen}
+      onClose={() => setIsAddModalOpen(false)}
+      onSuccess={handleAddRepairSuccess}
+    />
+  </div>
+);
 };
 
 export default AdminDashboard;
