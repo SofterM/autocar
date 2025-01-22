@@ -25,12 +25,12 @@ interface RepairPart {
   category_name: string;
 }
 
-const categories = [
+const categories = [{ id: 'others', name: 'อื่นๆ' },
   { id: 'engine_repair', name: 'ซ่อมเครื่องยนต์' },
   { id: 'parts_replacement', name: 'เปลี่ยนอะไหล่' },
   { id: 'maintenance', name: 'ตรวจเช็คระยะ' },
   { id: 'electrical_repair', name: 'ซ่อมระบบไฟฟ้า' },
-  { id: 'others', name: 'อื่นๆ' }
+  
 ];
 
 export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: ViewRepairModalProps) {
@@ -147,7 +147,7 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
         
         const updates: Partial<Repair> = {
             status: newStatus || repair.status,
-            category: newCategory || category || 'engine_repair', // เพิ่ม default value
+            category: newCategory || category || 'others', // เพิ่ม default value
             estimated_cost: Number(estimatedCost),
             parts_cost: finalPartsTotal,
             description,
@@ -239,7 +239,7 @@ export function ViewRepairModal({ isOpen, onClose, repair, onUpdateRepair }: Vie
     <h4 className="text-sm font-medium text-gray-500 mb-1">หมวดหมู่</h4>
     <div className="flex items-center gap-3">
         <span className="inline-flex px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-            {categories.find(cat => cat.id === (repair.category || category))?.name || 'ซ่อมเครื่องยนต์'}
+            {categories.find(cat => cat.id === (repair.category || category))?.name || 'อื่นๆ'}
         </span>
         <select
             value={repair.category || category}

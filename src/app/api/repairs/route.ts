@@ -1,3 +1,4 @@
+// D:\Github\autocar\src\app\api\repairs\route.ts
 import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
 import pool from '@/lib/db';
@@ -69,7 +70,7 @@ export async function GET(req: NextRequest) {
             expected_end_date: row.expected_end_date,
             actual_end_date: row.actual_end_date,
             status: row.status,
-            category: row.category || 'engine_repair',
+            category: row.category || 'others',
             estimated_cost: Number(row.estimated_cost) || 0,
             final_cost: Number(row.final_cost) || 0,
             parts_cost: Number(row.parts_cost) || 0,
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
             customerEmail,
             technicianId,
             estimatedCost,
-            category = 'engine_repair'
+            category = 'others'
         } = body;
 
         if (!brand || !model || !licensePlate || !mileage || !customerName || !customerPhone) {
@@ -237,7 +238,7 @@ export async function POST(request: NextRequest) {
             start_date: repair.start_date,
             expected_end_date: repair.expected_end_date,
             status: repair.status,
-            category: repair.category || 'engine_repair',
+            category: repair.category || 'others',
             description: repair.description,
             estimated_cost: Number(repair.estimated_cost) || 0,
             final_cost: Number(repair.final_cost) || 0,

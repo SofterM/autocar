@@ -50,12 +50,12 @@ export default function FinancialReports() {
     { month: 'มิ.ย.', revenue: 200000, expenses: 90000, profit: 110000 }
   ];
 
-  const serviceData: ServiceData[] = [
-    { name: 'ซ่อมเครื่องยนต์', value: 35 },
-    { name: 'เปลี่ยนอะไหล่', value: 25 },
-    { name: 'ตรวจเช็คระยะ', value: 20 },
-    { name: 'ซ่อมระบบไฟฟ้า', value: 15 },
-    { name: 'อื่นๆ', value: 5 }
+  const categories = [
+    { id: 'others', name: 'อื่นๆ' },
+    { id: 'engine_repair', name: 'ซ่อมเครื่องยนต์' },
+    { id: 'parts_replacement', name: 'เปลี่ยนอะไหล่' },
+    { id: 'maintenance', name: 'ตรวจเช็คระยะ' },
+    { id: 'electrical_repair', name: 'ซ่อมระบบไฟฟ้า' }
   ];
 
   const recentTransactions: Transaction[] = [
@@ -374,7 +374,7 @@ export default function FinancialReports() {
                   สัดส่วนบริการ
                 </h3>
                 <div className="h-80">
-                  <ServiceDistributionChart data={serviceData} />
+                <ServiceDistributionChart data={categories} />
                 </div>
               </div>
 

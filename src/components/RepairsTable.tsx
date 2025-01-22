@@ -207,12 +207,26 @@ export const RepairsTable: React.FC<RepairsTableProps> = ({
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right space-x-3 whitespace-nowrap">
-                                        <button 
-                                            onClick={() => onViewRepair(repair)}
-                                            className="text-blue-600 hover:text-blue-900 font-medium"
-                                        >
-                                            ดูรายละเอียด
-                                        </button>
+                                    <button 
+    onClick={() => onViewRepair(repair)}
+    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 focus:outline-none transition-all duration-300 shadow-sm"
+>
+    <span>ดูรายละเอียด</span>
+    <svg 
+        className="w-4 h-4 ml-2" 
+        fill="none" 
+        stroke="currentColor" 
+        viewBox="0 0 24 24"
+    >
+        <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth="2" 
+            d="M9 5l7 7-7 7"
+        />
+    </svg>
+</button>
+
                                         <button
                                             onClick={() => handleDeleteClick(repair)}
                                             className="text-red-600 hover:text-red-900 inline-flex items-center"
