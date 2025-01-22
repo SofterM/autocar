@@ -52,7 +52,7 @@ export const ServiceDistributionChart = ({ data }: ServiceDistributionChartProps
   if (chartData.length === 0) {
     return (
       <div className="flex items-center justify-center h-80">
-        <p className="text-gray-500">ไม่มีข้อมูล</p>
+        <p className="text-gray-500">กำลังโหลดข้อมูล...</p>
       </div>
     );
   }
