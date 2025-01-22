@@ -1,3 +1,4 @@
+// D:\Github\autocar\src\app\api\repairs\[id]\route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { formatBigInt, toBigInt } from '@/lib/db-utils';
@@ -25,6 +26,7 @@ export async function GET(
                 r.actual_end_date,
                 r.description,
                 r.status,
+                r.category,
                 r.estimated_cost,
                 r.final_cost,
                 r.parts_cost,
@@ -63,6 +65,7 @@ export async function GET(
             vehicle_id: formatBigInt(repair.vehicle_id),
             customer_id: formatBigInt(repair.customer_id),
             technician_id: formatBigInt(repair.technician_id),
+            category: repair.category || 'others',
             mileage: Number(repair.mileage),
             estimated_cost: Number(repair.estimated_cost),
             final_cost: repair.final_cost ? Number(repair.final_cost) : null,
@@ -140,6 +143,10 @@ export async function PATCH(
             updateFields.push('status = ?');
             updateValues.push(body.status);
         }
+        if (body.category !== undefined) {
+            updateFields.push('category = ?');
+            updateValues.push(body.category);
+        }
         if (body.estimated_cost !== undefined) {
             updateFields.push('estimated_cost = ?');
             updateValues.push(body.estimated_cost);
@@ -197,6 +204,7 @@ export async function PATCH(
             vehicle_id: formatBigInt(updatedRepair.vehicle_id),
             customer_id: formatBigInt(updatedRepair.customer_id),
             technician_id: formatBigInt(updatedRepair.technician_id),
+            category: updatedRepair.category || 'others',
             mileage: Number(updatedRepair.mileage),
             estimated_cost: Number(updatedRepair.estimated_cost),
             final_cost: updatedRepair.final_cost ? Number(updatedRepair.final_cost) : null,

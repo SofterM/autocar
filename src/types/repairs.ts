@@ -12,6 +12,7 @@ export interface Vehicle {
 }
 
 export interface Repair {
+    category: string;
     technician: any;
     customer_phone: string;
     customer_name: ReactNode;

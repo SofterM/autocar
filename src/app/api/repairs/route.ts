@@ -1,4 +1,3 @@
-// D:\Github\autocar\src\app\api\repairs\route.ts
 import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
 import pool from '@/lib/db';
@@ -22,7 +21,13 @@ export async function GET(req: NextRequest) {
                 c.phone as customer_phone,
                 c.email as customer_email,
                 t.name as technician_name,
-                t.position as technician_position
+                t.position as technician_position,
+                r.category,
+                r.estimated_cost,
+                r.final_cost,
+                r.parts_cost,
+                r.labor_cost,
+                r.total_cost
             FROM repairs r
             JOIN vehicles v ON r.vehicle_id = v.id
             JOIN customers c ON r.customer_id = c.id
@@ -64,8 +69,12 @@ export async function GET(req: NextRequest) {
             expected_end_date: row.expected_end_date,
             actual_end_date: row.actual_end_date,
             status: row.status,
-            estimated_cost: row.estimated_cost,
-            final_cost: row.final_cost,
+            category: row.category || 'engine_repair',
+            estimated_cost: Number(row.estimated_cost) || 0,
+            final_cost: Number(row.final_cost) || 0,
+            parts_cost: Number(row.parts_cost) || 0,
+            labor_cost: Number(row.labor_cost) || 0,
+            total_cost: Number(row.total_cost) || 0,
             description: row.description,
             customer: {
                 name: row.customer_name,
@@ -106,10 +115,10 @@ export async function POST(request: NextRequest) {
             customerPhone,
             customerEmail,
             technicianId,
-            estimatedCost
+            estimatedCost,
+            category = 'engine_repair'
         } = body;
 
-        // Input validation
         if (!brand || !model || !licensePlate || !mileage || !customerName || !customerPhone) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
@@ -120,7 +129,6 @@ export async function POST(request: NextRequest) {
         connection = await pool.getConnection();
         await connection.beginTransaction();
 
-        // 1. Create or update customer
         const [customerResult] = await connection.execute(
             `INSERT INTO customers (name, phone, email) 
              VALUES (?, ?, ?)
@@ -131,10 +139,8 @@ export async function POST(request: NextRequest) {
             [customerName, customerPhone, customerEmail || null]
         );
         
-        // Get customer ID (whether inserted or updated)
         let customerId;
         if ((customerResult as any).insertId === 0) {
-            // If customer already existed, fetch their ID
             const [existingCustomer] = await connection.execute(
                 'SELECT id FROM customers WHERE phone = ?',
                 [customerPhone]
@@ -144,7 +150,6 @@ export async function POST(request: NextRequest) {
             customerId = (customerResult as any).insertId;
         }
 
-        // 2. Create or update vehicle
         const [vehicleResult] = await connection.execute(
             `INSERT INTO vehicles (customer_id, brand, model, license_plate, color, mileage)
              VALUES (?, ?, ?, ?, ?, ?)
@@ -157,10 +162,8 @@ export async function POST(request: NextRequest) {
             [customerId, brand, model, licensePlate, color, mileage]
         );
 
-        // Get vehicle ID (whether inserted or updated)
         let vehicleId;
         if ((vehicleResult as any).insertId === 0) {
-            // If vehicle already existed, fetch its ID
             const [existingVehicle] = await connection.execute(
                 'SELECT id FROM vehicles WHERE license_plate = ?',
                 [licensePlate]
@@ -170,27 +173,32 @@ export async function POST(request: NextRequest) {
             vehicleId = (vehicleResult as any).insertId;
         }
 
-        // 3. Create repair record
         const [repairResult] = await connection.execute(
             `INSERT INTO repairs (
                 vehicle_id,
                 customer_id,
                 technician_id,
                 status,
+                category,
                 start_date,
                 expected_end_date,
                 description,
                 estimated_cost,
-                mileage
-            ) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?)`,
+                mileage,
+                final_cost,
+                parts_cost,
+                labor_cost,
+                total_cost
+            ) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, 0, 0, 0, 0)`,
             [
                 vehicleId,
                 customerId,
                 technicianId || null,
+                category,
                 startDate || new Date(),
                 expectedEndDate || null,
                 description || null,
-                estimatedCost || null,
+                estimatedCost || 0,
                 mileage
             ]
         );
@@ -198,7 +206,6 @@ export async function POST(request: NextRequest) {
 
         await connection.commit();
 
-        // Fetch the created repair with all related information
         const [rows] = await connection.execute(`
             SELECT 
                 r.*,
@@ -230,8 +237,13 @@ export async function POST(request: NextRequest) {
             start_date: repair.start_date,
             expected_end_date: repair.expected_end_date,
             status: repair.status,
+            category: repair.category || 'engine_repair',
             description: repair.description,
-            estimated_cost: repair.estimated_cost,
+            estimated_cost: Number(repair.estimated_cost) || 0,
+            final_cost: Number(repair.final_cost) || 0,
+            parts_cost: Number(repair.parts_cost) || 0,
+            labor_cost: Number(repair.labor_cost) || 0,
+            total_cost: Number(repair.total_cost) || 0,
             customer: {
                 name: repair.customer_name,
                 phone: repair.customer_phone,
