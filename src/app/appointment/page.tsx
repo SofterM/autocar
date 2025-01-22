@@ -96,7 +96,6 @@ export default function AppointmentPage() {
         throw new Error(errorData.error || 'Failed to create appointment');
       }
 
-      const result = await response.json();
       alert('จองคิวสำเร็จ!');
       
       // Reset form
