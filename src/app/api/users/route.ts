@@ -8,7 +8,7 @@ export async function GET(req: Request) {
         const role = searchParams.get('role');
 
         let query = 'SELECT id, email, first_name, last_name, role, phone FROM users WHERE 1=1';
-        const params: any[] = [];
+        const params: unknown[] = [];
 
         query += ` AND NOT EXISTS (
             SELECT 1 FROM technicians t 

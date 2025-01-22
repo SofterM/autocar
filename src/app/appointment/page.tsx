@@ -47,7 +47,7 @@ export default function AppointmentPage() {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-
+  
   // Effects
   useEffect(() => {
     const fetchUserProfile = async () => {
