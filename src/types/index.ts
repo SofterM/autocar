@@ -18,12 +18,14 @@ export interface Technician {
     updated_at: string;
 }
 
-export type ContactChannel = {
-    id?: string;
-    type: 'website' | 'phone' | 'email';
-    value: string;
-    description: string;
-    status: 'active' | 'inactive';
-    created_at?: string;
-    updated_at?: string;
-}
+export interface Contact {
+    id: string;
+    facebook: string;
+    line: string;
+    email: string;
+    technician_phone: string;
+    manager_phone: string;
+    address: string;
+    created_at?: Date;
+    updated_at?: Date;
+  }
