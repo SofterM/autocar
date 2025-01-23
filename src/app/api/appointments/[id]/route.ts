@@ -1,7 +1,7 @@
 // src/app/api/appointments/[id]/route.ts
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { RowDataPacket } from 'mysql2';
+import { OkPacket, RowDataPacket } from 'mysql2';
 
 interface AppointmentRow extends RowDataPacket {
     id: number;
