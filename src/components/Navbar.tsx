@@ -97,7 +97,7 @@ export default function Navbar() {
   const getMenuItems = () => {
     const baseMenuItems = [
       { name: 'หน้าแรก', path: '/' },
-      { name: 'จองคิว', path: '/reports' },
+      { name: 'จองคิว', path: '/appointment' },
       { name: 'ช่องทางการติดต่อ', path: '/contact' },
     ]
 
