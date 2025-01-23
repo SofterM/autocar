@@ -6,6 +6,7 @@ import StarryBackground from '@/components/StarryBackground'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import debounce from 'lodash/debounce'
+import CalendarBookings from '@/components/CalendarBookings'
 
 const TEXTS = [
   'ระบบซ่อมบำรุงยานพาหนะ',
@@ -328,7 +329,10 @@ export default function Home() {
           </div>
         </main>
       </div>
-      <Footer />
+      <div className="flex flex-col gap-24">
+  <CalendarBookings className="mt-8 max-w-4xl mx-auto" />
+  <Footer />
+</div>
     </div>
   )
 }
