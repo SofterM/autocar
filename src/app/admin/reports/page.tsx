@@ -378,18 +378,13 @@ export default function FinancialReports() {
                 </div>
               </div>
 
-              <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    รายการล่าสุด
-                  </h3>
-                  <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-                    ดูทั้งหมด
-                  </button>
-                </div>
-                <RecentTransactions transactions={recentTransactions} />
-              </div>
-            </div>
+              {/* Recent Transactions */}
+<div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm">
+  <div className="flex justify-between items-center mb-4">
+  </div>
+  <RecentTransactions limit={5} />
+</div>
+</div>
 
             {/* Financial Summary Table */}
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">

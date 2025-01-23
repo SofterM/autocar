@@ -91,7 +91,7 @@ export default function CalendarBookings({ className }: CalendarBookingsProps) {
       days.push(
         <div 
           key={`empty-${i}`} 
-          className="h-16 sm:h-20 md:h-24 border border-gray-700 bg-gray-800/50 rounded-lg"
+          className="h-12 sm:h-16 md:h-20 border border-gray-700 bg-gray-800/50 rounded-lg"
         />
       )
     }
@@ -106,18 +106,18 @@ export default function CalendarBookings({ className }: CalendarBookingsProps) {
         <motion.div 
           key={day}
           onClick={() => setSelectedDate(date)}
-          whileHover={{ scale: 1.02 }}
+          whileHover={{ scale: 1.05 }}
           className={`
-            h-24 border border-gray-700 bg-gray-800/50 p-2
+            h-16 sm:h-20 md:h-24 border border-gray-700 bg-gray-800/50 p-1 sm:p-2
             cursor-pointer hover:bg-gray-700/50 transition-all rounded-lg
             relative overflow-hidden
             ${selectedDate?.getDate() === day ? 'ring-2 ring-[#6C63FF]' : ''}
           `}
         >
-          <span className="text-sm text-white">{day}</span>
+          <span className="text-xs sm:text-sm text-white">{day}</span>
           {dayBookings.length > 0 && (
-            <div className="absolute bottom-2 left-2 right-2">
-              <div className="bg-[#6C63FF]/20 text-[#6C63FF] text-xs px-2 py-1 rounded-md">
+            <div className="absolute bottom-1 sm:bottom-2 left-1 sm:left-2 right-1 sm:right-2">
+              <div className="bg-[#6C63FF]/20 text-[#6C63FF] text-[10px] sm:text-xs px-1 sm:px-2 py-0.5 sm:py-1 rounded-md">
                 {dayBookings.length} การจอง
               </div>
             </div>
@@ -145,20 +145,20 @@ export default function CalendarBookings({ className }: CalendarBookingsProps) {
   }
 
   return (
-    <div className={`container mx-auto max-w-4xl bg-gray-900/95 backdrop-blur-lg rounded-2xl p-6 shadow-xl ${className}`}>
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 mb-6">
-        <div className="flex items-center gap-3">
-          <Calendar className="h-6 w-6 text-[#6C63FF]" />
-          <h2 className="text-xl sm:text-2xl font-bold text-white">ปฏิทินการจอง</h2>
+    <div className={`container mx-auto max-w-4xl bg-gray-900/95 backdrop-blur-lg rounded-2xl p-4 sm:p-6 shadow-xl ${className}`}>
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 mb-4 sm:mb-6">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-[#6C63FF]" />
+          <h2 className="text-lg sm:text-2xl font-bold text-white">ปฏิทินการจองคิวนัดซ่อม</h2>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <button
             onClick={handlePrevMonth}
-            className="p-2 text-white hover:bg-gray-800 rounded-lg transition-colors"
+            className="p-1 sm:p-2 text-white hover:bg-gray-800 rounded-lg transition-colors"
           >
             ←
           </button>
-          <span className="text-white font-medium">
+          <span className="text-sm sm:text-base text-white font-medium">
             {currentDate.toLocaleDateString('th-TH', { 
               month: 'long', 
               year: 'numeric' 
@@ -166,7 +166,7 @@ export default function CalendarBookings({ className }: CalendarBookingsProps) {
           </span>
           <button
             onClick={handleNextMonth}
-            className="p-2 text-white hover:bg-gray-800 rounded-lg transition-colors"
+            className="p-1 sm:p-2 text-white hover:bg-gray-800 rounded-lg transition-colors"
           >
             →
           </button>
@@ -174,24 +174,24 @@ export default function CalendarBookings({ className }: CalendarBookingsProps) {
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center h-96">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6C63FF]" />
+        <div className="flex justify-center items-center h-64 sm:h-96">
+          <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-[#6C63FF]" />
         </div>
       ) : error ? (
-        <div className="flex justify-center items-center h-96 text-red-500">
+        <div className="flex justify-center items-center h-64 sm:h-96 text-red-500">
           {error}
         </div>
       ) : (
         <>
           <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
             {WEEKDAYS.map(day => (
-              <div key={day} className="text-center text-gray-400 text-sm py-2">
+              <div key={day} className="text-center text-gray-400 text-xs sm:text-sm py-1 sm:py-2">
                 {day}
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-7 gap-1 sm:gap-2">
             {generateCalendarDays()}
           </div>
         </>
@@ -210,11 +210,11 @@ export default function CalendarBookings({ className }: CalendarBookingsProps) {
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
-              className="bg-gray-900 rounded-xl p-6 max-w-lg w-full"
+              className="bg-gray-900 rounded-xl p-4 sm:p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto"
               onClick={e => e.stopPropagation()}
             >
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-white">
+              <div className="flex justify-between items-center mb-4 sm:mb-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-white">
                   {selectedDate.toLocaleDateString('th-TH', { 
                     day: 'numeric', 
                     month: 'long', 
@@ -225,37 +225,37 @@ export default function CalendarBookings({ className }: CalendarBookingsProps) {
                   onClick={() => setSelectedDate(null)}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
               </div>
 
-              <div className="space-y-4 max-h-[60vh] overflow-auto">
+              <div className="space-y-3 sm:space-y-4">
                 {getDayBookings().length === 0 ? (
-                  <div className="text-center text-gray-400 py-8">
+                  <div className="text-center text-gray-400 py-6">
                     ไม่มีการจองในวันนี้
                   </div>
                 ) : (
                   getDayBookings().map(booking => (
                     <div
                       key={booking.id}
-                      className="bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-colors"
+                      className="bg-gray-800 rounded-lg p-3 sm:p-4 hover:bg-gray-700 transition-colors"
                     >
                       <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium text-white">
+                        <div className="flex-1 pr-2">
+                          <p className="text-sm sm:text-base font-medium text-white">
                             {booking.user.firstName} {booking.user.lastName}
                           </p>
-                          <p className="text-sm text-gray-400 mt-1">
+                          <p className="text-xs sm:text-sm text-gray-400 mt-1">
                             {booking.service}
                           </p>
                           {booking.user.phone && (
-                            <p className="text-sm text-gray-400">
+                            <p className="text-xs sm:text-sm text-gray-400">
                               {booking.user.phone}
                             </p>
                           )}
                         </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <span className="text-[#6C63FF] font-medium">
+                        <div className="flex flex-col items-end gap-1 sm:gap-2">
+                          <span className="text-xs sm:text-sm text-[#6C63FF] font-medium">
                             {booking.appointment_time} น.
                           </span>
                           <StatusBadge status={booking.status} />
