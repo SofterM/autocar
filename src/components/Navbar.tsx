@@ -79,7 +79,6 @@ export default function Navbar() {
     setShowRegisterModal(false)
     toast.success('เข้าสู่ระบบสำเร็จ')
     
-    // Redirect based on user role
     if (user.role === 'admin') {
       router.push('/admin')
     } else {
@@ -95,13 +94,25 @@ export default function Navbar() {
     toast.success('ออกจากระบบสำเร็จ')
   }
 
-  const menuItems = [
-    { name: 'หน้าแรก', path: '/' },
-    { name: 'แดชบอร์ด', path: '/admin' },
-    { name: 'จองคิว', path: '/reports' },
-    { name: 'ช่องทางการติดต่อ', path: '/contact' },
-  ]
+  const getMenuItems = () => {
+    const baseMenuItems = [
+      { name: 'หน้าแรก', path: '/' },
+      { name: 'จองคิว', path: '/reports' },
+      { name: 'ช่องทางการติดต่อ', path: '/contact' },
+    ]
 
+    if (user && (user.role === 'admin' || user.role === 'technician')) {
+      return [
+        baseMenuItems[0],
+        { name: 'แดชบอร์ด', path: '/admin' },
+        ...baseMenuItems.slice(1)
+      ]
+    }
+
+    return baseMenuItems
+  }
+
+  const menuItems = getMenuItems()
   const unreadNotifications = notifications.filter(n => !n.isRead).length
 
   const handleNotificationClick = (notificationId: number) => {
