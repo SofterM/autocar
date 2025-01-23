@@ -1,4 +1,3 @@
-// src/app/api/appointments/route.ts
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { ResultSetHeader, RowDataPacket, OkPacket } from 'mysql2';
@@ -7,6 +6,7 @@ interface AppointmentRow extends RowDataPacket {
     id: number;
     user_id: number;
     service: string;
+    repair_details: string;
     appointment_date: Date;
     appointment_time: string;
     status: string;
@@ -58,6 +58,7 @@ export async function GET(req: Request) {
             id: row.id,
             user_id: row.user_id,
             service: row.service,
+            repair_details: row.repair_details,
             appointment_date: row.appointment_date,
             appointment_time: row.appointment_time,
             status: row.status || 'pending',
@@ -82,7 +83,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { user_id, service, appointment_date, appointment_time } = body;
+        const { user_id, service, repair_details, appointment_date, appointment_time } = body;
 
         const [existing] = await pool.execute<AppointmentRow[]>(
             'SELECT id FROM appointments WHERE appointment_date = ? AND appointment_time = ? AND status != "cancelled"',
@@ -97,8 +98,8 @@ export async function POST(req: Request) {
         }
 
         await pool.execute<OkPacket>(
-            'INSERT INTO appointments (user_id, service, appointment_date, appointment_time, status) VALUES (?, ?, ?, ?, ?)',
-            [user_id, service, appointment_date, appointment_time, 'pending']
+            'INSERT INTO appointments (user_id, service, repair_details, appointment_date, appointment_time, status) VALUES (?, ?, ?, ?, ?, ?)',
+            [user_id, service, repair_details, appointment_date, appointment_time, 'pending']
         );
 
         return NextResponse.json({
