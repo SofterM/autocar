@@ -12,7 +12,8 @@ import {
   LogOut,
   Wrench,
   ChevronRight,
-  X
+  X,
+  Calendar
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -81,9 +82,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           path: '/admin/reports',
         },
         { 
+          icon: Calendar, 
+          label: 'การจองคิว',
+          path: '/admin/contects',
+        },
+        { 
           icon: MessageSquare, 
           label: 'ช่องทางการติดต่อ',
-          path: '/admin/contects',
+          path: '/admin/appointment',
         },
       ]
     }
