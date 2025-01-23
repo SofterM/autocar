@@ -34,7 +34,7 @@ const Footer = () => {
           <motion.div variants={item} className="lg:col-span-1">
             <div className="flex flex-col h-full">
               <Image
-                src="/logo.png"
+                src="/LOGO.png"
                 alt="Auto Service"
                 width={120}
                 height={30}

@@ -122,10 +122,10 @@ export default function Home() {
       <div className="relative flex-1">
         <div className="absolute inset-0 bg-gradient-to-b from-blue-900/20 to-transparent pointer-events-none" />
         <Navbar />
-        <main className="h-[calc(100vh-64px)]">
-          <div className="h-full flex flex-col items-center justify-center px-4 sm:px-6">
+        <main className="min-h-screen pb-32">
+          <div className="flex flex-col items-center justify-center px-4 sm:px-6 pt-20">
             <motion.div
-              className="text-center max-w-4xl z-10 w-full"
+              className="text-center max-w-4xl z-10 w-full relative"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
@@ -196,9 +196,24 @@ export default function Home() {
                       exit={{ opacity: 0 }}
                       className="mt-8 flex justify-center"
                     >
-                      <div className="inline-flex items-center px-4 py-2 rounded-lg bg-white/5">
-                        <div className="animate-spin h-5 w-5 border-b-2 border-white mr-2"></div>
-                        <span className="text-gray-400">กำลังค้นหา...</span>
+                      <div className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-white/5 backdrop-blur-md">
+                        <svg className="animate-spin h-5 w-5 text-[#6C63FF]" viewBox="0 0 24 24">
+                          <circle 
+                            className="opacity-25" 
+                            cx="12" 
+                            cy="12" 
+                            r="10" 
+                            stroke="currentColor" 
+                            strokeWidth="4"
+                            fill="none"
+                          />
+                          <path 
+                            className="opacity-75" 
+                            fill="currentColor" 
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
+                        </svg>
+                        <span className="text-gray-400 font-medium">กำลังค้นหา...</span>
                       </div>
                     </motion.div>
                   ) : repairs.length > 0 ? (
@@ -206,7 +221,7 @@ export default function Home() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="mt-6 space-y-4 max-h-[50vh] overflow-auto"
+                      className="mt-6 space-y-4 max-h-[calc(100vh-500px)] overflow-auto custom-scrollbar"
                     >
                       {repairs.map((repair) => (
                         <motion.div
@@ -262,8 +277,8 @@ export default function Home() {
                       exit={{ opacity: 0 }}
                       className="mt-8 text-center"
                     >
-                      <div className="inline-block px-4 py-2 rounded-lg bg-white/5">
-                        <p className="text-gray-400">ไม่พบข้อมูลการซ่อมสำหรับการค้นหานี้</p>
+                      <div className="inline-block px-6 py-3 rounded-xl bg-white/5 backdrop-blur-md">
+                        <p className="text-gray-400 font-medium">ไม่พบข้อมูลการซ่อมสำหรับการค้นหานี้</p>
                       </div>
                     </motion.div>
                   )}

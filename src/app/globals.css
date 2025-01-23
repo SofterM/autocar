@@ -70,3 +70,23 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(108, 99, 255, 0.3) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(108, 99, 255, 0.3);
+  border-radius: 20px;
+  border: transparent;
+}
