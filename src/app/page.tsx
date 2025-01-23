@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, X } from 'lucide-react'
+import { Search, X, Calendar, Phone, Car, Wrench, CreditCard, FileText } from 'lucide-react'
 import StarryBackground from '@/components/StarryBackground'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -94,12 +94,12 @@ export default function Home() {
 
   const getStatusStyle = (status: string) => {
     const styleMap: Record<string, string> = {
-      completed: 'bg-green-100 text-green-800',
-      in_progress: 'bg-blue-100 text-blue-800',
-      pending: 'bg-yellow-100 text-yellow-800',
-      cancelled: 'bg-red-100 text-red-800'
+      completed: 'bg-green-500 text-white',
+      in_progress: 'bg-blue-500 text-white',
+      pending: 'bg-yellow-500 text-white',
+      cancelled: 'bg-red-500 text-white'
     }
-    return styleMap[status] || 'bg-gray-100 text-gray-800'
+    return styleMap[status] || 'bg-gray-500 text-white'
   }
 
   const formatDate = (date: string | null) => {
@@ -159,14 +159,13 @@ export default function Home() {
               </motion.p>
 
               <motion.div
-                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 sm:p-8 max-w-3xl mx-auto"
+                className="bg-gray-900/95 backdrop-blur-lg rounded-2xl p-6 sm:p-8 max-w-3xl mx-auto shadow-xl"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
               >
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#6C63FF]/20 to-blue-500/20 rounded-xl blur"></div>
-                  <div className="relative bg-black/40 backdrop-blur-xl rounded-xl border border-white/10 transition-all group-hover:border-[#6C63FF]/50">
+                <div className="relative">
+                  <div className="relative bg-gray-800 rounded-xl border border-gray-700 transition-all hover:border-[#6C63FF]/50">
                     <div className="flex items-center px-4">
                       <Search className="h-5 w-5 text-gray-400" />
                       <input
@@ -196,7 +195,7 @@ export default function Home() {
                       exit={{ opacity: 0 }}
                       className="mt-8 flex justify-center"
                     >
-                      <div className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-white/5 backdrop-blur-md">
+                      <div className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-gray-800">
                         <svg className="animate-spin h-5 w-5 text-[#6C63FF]" viewBox="0 0 24 24">
                           <circle 
                             className="opacity-25" 
@@ -213,7 +212,7 @@ export default function Home() {
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                           />
                         </svg>
-                        <span className="text-gray-400 font-medium">กำลังค้นหา...</span>
+                        <span className="text-gray-300">กำลังค้นหา...</span>
                       </div>
                     </motion.div>
                   ) : repairs.length > 0 ? (
@@ -229,43 +228,84 @@ export default function Home() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -20 }}
-                          className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-6 hover:border-[#6C63FF]/30 transition-all"
+                          className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-[#6C63FF]/50 transition-all"
                         >
-                          <div className="flex justify-between items-start mb-4">
-                            <div>
-                              <h3 className="font-medium text-white text-lg">
-                                {repair.brand} {repair.model}
-                              </h3>
-                              <p className="text-sm text-gray-400">
-                                ทะเบียน: {repair.license_plate}
-                                {repair.color && ` • สี${repair.color}`}
-                              </p>
+                          <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Car className="h-5 w-5 text-[#6C63FF]" />
+                                <h3 className="font-semibold text-white text-lg">
+                                  {repair.brand} {repair.model}
+                                </h3>
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-700 text-white">
+                                  {repair.license_plate}
+                                </span>
+                                {repair.color && (
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-700 text-white">
+                                    สี{repair.color}
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusStyle(repair.status)}`}>
+                            <span className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusStyle(repair.status)}`}>
                               {getStatusText(repair.status)}
                             </span>
                           </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <p className="text-gray-400">ลูกค้า: <span className="text-white">{repair.customer.name}</span></p>
-                              <p className="text-gray-400">โทร: <span className="text-white">{formatPhoneNumber(repair.customer.phone)}</span></p>
-                            </div>
-                            <div>
-                              <p className="text-gray-400">วันรับรถ: <span className="text-white">{formatDate(repair.start_date)}</span></p>
-                              <p className="text-gray-400">นัดรับรถ: <span className="text-white">{formatDate(repair.expected_end_date)}</span></p>
-                            </div>
-                            <div>
-                              <p className="text-gray-400">เลขไมล์: <span className="text-white">{repair.mileage.toLocaleString()} กม.</span></p>
-                              <p className="text-gray-400">ประเมินราคา: <span className="text-white">฿{repair.estimated_cost.toLocaleString()}</span></p>
-                              {repair.final_cost !== null && (
-                                <p className="text-gray-400">ค่าซ่อมจริง: <span className="text-white">฿{repair.final_cost.toLocaleString()}</span></p>
-                              )}
-                            </div>
-                            {repair.description && (
-                              <div className="sm:col-span-2">
-                                <p className="text-gray-400">รายละเอียด: <span className="text-white">{repair.description}</span></p>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                              <div className="flex items-start gap-3">
+                                <div className="mt-1">
+                                  <FileText className="h-5 w-5 text-[#6C63FF]" />
+                                </div>
+                                <div>
+                                  <p className="text-gray-400 text-sm mb-1">ข้อมูลลูกค้า</p>
+                                  <p className="text-white">{repair.customer.name}</p>
+                                  <p className="text-white">{formatPhoneNumber(repair.customer.phone)}</p>
+                                </div>
                               </div>
-                            )}
+
+                              <div className="flex items-start gap-3">
+                                <div className="mt-1">
+                                  <Calendar className="h-5 w-5 text-[#6C63FF]" />
+                                </div>
+                                <div>
+                                  <p className="text-gray-400 text-sm mb-1">วันที่</p>
+                                  <p className="text-white">รับรถ: {formatDate(repair.start_date)}</p>
+                                  <p className="text-white">นัดรับ: {formatDate(repair.expected_end_date)}</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="space-y-4">
+                              <div className="flex items-start gap-3">
+                                <div className="mt-1">
+                                  <Wrench className="h-5 w-5 text-[#6C63FF]" />
+                                </div>
+                                <div>
+                                  <p className="text-gray-400 text-sm mb-1">ข้อมูลการซ่อม</p>
+                                  <p className="text-white">เลขไมล์: {repair.mileage.toLocaleString()} กม.</p>
+                                  {repair.description && (
+                                    <p className="text-white mt-1">{repair.description}</p>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex items-start gap-3">
+                                <div className="mt-1">
+                                  <CreditCard className="h-5 w-5 text-[#6C63FF]" />
+                                </div>
+                                <div>
+                                  <p className="text-gray-400 text-sm mb-1">ค่าใช้จ่าย</p>
+                                  <p className="text-white">ประเมินราคา: ฿{repair.estimated_cost.toLocaleString()}</p>
+                                  {repair.final_cost !== null && (
+                                    <p className="text-white">ค่าซ่อมจริง: ฿{repair.final_cost.toLocaleString()}</p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </motion.div>
                       ))}

@@ -89,7 +89,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         { 
           icon: MessageSquare, 
           label: 'ช่องทางการติดต่อ',
-          path: '/admin/contects',
+          path: '/admin/contacts',
         },
       ]
     }

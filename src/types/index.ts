@@ -17,3 +17,13 @@ export interface Technician {
     created_at: string;
     updated_at: string;
 }
+
+export type ContactChannel = {
+    id?: string;
+    type: 'website' | 'phone' | 'email';
+    value: string;
+    description: string;
+    status: 'active' | 'inactive';
+    created_at?: string;
+    updated_at?: string;
+}
