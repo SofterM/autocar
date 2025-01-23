@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import debounce from 'lodash/debounce'
 import CalendarBookings from '@/components/CalendarBookings'
+import Hero from '@/components/Hero'
 
 const TEXTS = [
   'ระบบซ่อมบำรุงยานพาหนะ',
@@ -326,11 +327,16 @@ export default function Home() {
                 </AnimatePresence>
               </motion.div>
             </motion.div>
+            
+          </div>
+          <div className="mt-24">
+          <Hero />
           </div>
         </main>
+        
       </div>
       <div className="flex flex-col gap-24">
-  <CalendarBookings className="mt-8 max-w-4xl mx-auto" />
+  <CalendarBookings className="mt-2 max-w-4xl mx-auto" />
   <Footer />
 </div>
     </div>
