@@ -10,7 +10,6 @@ import {
   Bell,
   Search,
   Menu,
-  Calendar,
   ArrowUpRight,
   ArrowDownRight
 } from 'lucide-react';
@@ -19,6 +18,7 @@ import Sidebar from '@/components/admin/Sidebar';
 import { AddRepairModal } from '@/components/AddRepairModal';
 import { Repair } from '@/types/repairs';
 import { User } from '@/types/user';
+import { Appointment } from '@/types/appointment';
 import { getStatusText, getStatusBadgeStyle } from '@/utils/format';
 
 const AdminDashboard = () => {
@@ -29,6 +29,8 @@ const AdminDashboard = () => {
   const [repairs, setRepairs] = useState<Repair[]>([]);
   const [recentRepairs, setRecentRepairs] = useState<any[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [todayAppointments, setTodayAppointments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -59,10 +61,52 @@ const AdminDashboard = () => {
   const fetchInitialData = async () => {
     try {
       setIsLoading(true);
-      await Promise.all([fetchRepairs(), fetchUsers()]);
+      await Promise.all([fetchRepairs(), fetchUsers(), fetchAppointments()]);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const fetchAppointments = async () => {
+    try {
+      const response = await fetch('/api/appointments');
+      if (response.ok) {
+        const data = await response.json();
+        setAppointments(data || []);
+        setTodayAppointments(getTodayAppointments(data));
+      }
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+    }
+  };
+
+  const getTodayAppointments = (appointments: Appointment[]) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return appointments
+      .filter(appointment => {
+        const appointmentDate = new Date(appointment.appointment_date);
+        appointmentDate.setHours(0, 0, 0, 0);
+        return appointmentDate.getTime() === today.getTime();
+      })
+      .sort((a, b) => {
+        const timeA = new Date(a.appointment_date).getTime();
+        const timeB = new Date(b.appointment_date).getTime();
+        return timeA - timeB;
+      })
+      .slice(0, 3)
+      .map(appointment => ({
+        id: appointment.id,
+        time: new Date(appointment.appointment_date).toLocaleTimeString('th-TH', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        }),
+        customer: appointment.customer?.name || 'ไม่ระบุ',
+        service: appointment.service_description || 'ไม่ระบุ',
+        type: appointment.service_type || 'ทั่วไป'
+      }));
   };
 
   const fetchUsers = async () => {
@@ -171,30 +215,6 @@ const AdminDashboard = () => {
       isUp: true,
       icon: Users,
       color: 'bg-emerald-500'
-    }
-  ];
-
-  const upcomingAppointments = [
-    {
-      id: 1,
-      time: '10:00',
-      customer: 'คุณสมหญิง รักษ์ดี',
-      service: 'เปลี่ยนน้ำมันเครื่อง',
-      type: 'ตรวจเช็คระยะ'
-    },
-    {
-      id: 2,
-      time: '13:30',
-      customer: 'คุณประเสริฐ มั่งมี',
-      service: 'เช็คระบบแอร์',
-      type: 'ซ่อมทั่วไป'
-    },
-    {
-      id: 3,
-      time: '15:00',
-      customer: 'คุณวิภาดา สุขสันต์',
-      service: 'เปลี่ยนผ้าเบรก',
-      type: 'ซ่อมด่วน'
     }
   ];
 
@@ -311,7 +331,7 @@ const AdminDashboard = () => {
                     >
                       ดูทั้งหมด
                     </button>
-                  </div>
+                    </div>
                   <div className="space-y-4">
                     {recentRepairs.map((repair) => (
                       <div key={repair.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors gap-4">
@@ -320,64 +340,67 @@ const AdminDashboard = () => {
                           <p className="text-sm text-gray-600">{repair.carModel}</p>
                           <div className="flex items-center gap-2 text-sm flex-wrap">
                             <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${repair.statusColor}`}>
-                            {repair.status}
-                          </span>
-                          <span className="text-gray-500">• {repair.assignedTo}</span>
+                              {repair.status}
+                            </span>
+                            <span className="text-gray-500">• {repair.assignedTo}</span>
+                          </div>
+                        </div>
+                        <div className="text-left sm:text-right">
+                          <p className="text-sm font-medium text-gray-900">{repair.service || '-'}</p>
+                          <p className="text-sm text-gray-500 mt-1">{repair.timeLeft}</p>
                         </div>
                       </div>
-                      <div className="text-left sm:text-right">
-                        <p className="text-sm font-medium text-gray-900">{repair.service || '-'}</p>
-                        <p className="text-sm text-gray-500 mt-1">{repair.timeLeft}</p>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Upcoming Appointments */}
-            <div className="bg-white rounded-xl shadow-sm">
-              <div className="p-4 lg:p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-bold text-gray-900">นัดหมายวันนี้</h2>
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <Calendar className="h-5 w-5 text-gray-500" />
-                  </button>
-                </div>
-                <div className="space-y-6">
-                  {upcomingAppointments.map((appointment) => (
-                    <div key={appointment.id} className="flex gap-4">
-                      <div className="w-16 py-2 px-3 bg-indigo-50 rounded-lg text-center flex-shrink-0">
-                        <p className="text-sm font-semibold text-indigo-600">{appointment.time}</p>
+              {/* Upcoming Appointments */}
+              <div className="bg-white rounded-xl shadow-sm">
+                <div className="p-4 lg:p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-lg font-bold text-gray-900">นัดหมายวันนี้</h2>
+                    <button 
+                      onClick={() => router.push('/admin/appointments')}
+                      className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                    >
+                      ดูทั้งหมด
+                    </button>
+                  </div>
+                  <div className="space-y-6">
+                    {todayAppointments.map((appointment) => (
+                      <div key={appointment.id} className="flex gap-4">
+                        <div className="w-16 py-2 px-3 bg-indigo-50 rounded-lg text-center flex-shrink-0">
+                          <p className="text-sm font-semibold text-indigo-600">{appointment.time}</p>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 truncate">{appointment.customer}</p>
+                          <p className="text-sm text-gray-600 truncate">{appointment.service}</p>
+                          <span className="inline-block mt-1 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
+                            {appointment.type}
+                          </span>
+                        </div>
+                        <button className="self-center p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0">
+                          <ChevronRight className="h-5 w-5 text-gray-400" />
+                        </button>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">{appointment.customer}</p>
-                        <p className="text-sm text-gray-600 truncate">{appointment.service}</p>
-                        <span className="inline-block mt-1 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
-                          {appointment.type}
-                        </span>
-                      </div>
-                      <button className="self-center p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0">
-                        <ChevronRight className="h-5 w-5 text-gray-400" />
-                      </button>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
 
-    {/* Modals */}
-    <AddRepairModal
-      isOpen={isAddModalOpen}
-      onClose={() => setIsAddModalOpen(false)}
-      onSuccess={handleAddRepairSuccess}
-    />
-  </div>
-);
+      {/* Modals */}
+      <AddRepairModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={handleAddRepairSuccess}
+      />
+    </div>
+  );
 };
 
 export default AdminDashboard;
