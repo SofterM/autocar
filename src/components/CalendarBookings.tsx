@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Calendar, X } from 'lucide-react'
+import { Calendar, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface Booking {
@@ -41,7 +41,32 @@ const StatusBadge = ({ status }: { status: Booking['status'] }) => (
   </span>
 )
 
-export default function CalendarBookings({ className }: CalendarBookingsProps) {
+export default function CalendarBookingsContainer({ className }: CalendarBookingsProps) {
+  return (
+    <div className="container mx-auto max-w-4xl">
+      {/* Header outside the card */}
+      <div className="mb-6 text-center">
+        <div className="inline-block bg-[#6C63FF]/10 px-4 py-2 rounded-full mb-2">
+          <div className="flex items-center justify-center gap-2 text-[#6C63FF]">
+            <Calendar className="h-5 w-5" />
+            <span className="font-semibold text-sm">ระบบจัดการนัดหมาย</span>
+          </div>
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+          ปฏิทินการจองคิวซ่อม
+        </h2>
+        <p className="text-gray-400 text-sm sm:text-base max-w-2xl mx-auto mb-6">
+          เลือกวันที่ต้องการเพื่อดูรายละเอียดการจอง วางแผนและติดตามคิวซ่อมของคุณได้อย่างง่ายดาย
+        </p>
+      </div>
+
+      {/* Calendar Component */}
+      <CalendarBookings className={className} />
+    </div>
+  )
+}
+
+function CalendarBookings({ className }: CalendarBookingsProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [bookings, setBookings] = useState<Booking[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -145,18 +170,14 @@ export default function CalendarBookings({ className }: CalendarBookingsProps) {
   }
 
   return (
-    <div className={`container mx-auto max-w-4xl bg-gray-900/95 backdrop-blur-lg rounded-2xl p-4 sm:p-6 shadow-xl ${className}`}>
+    <div className={`bg-gray-900/95 backdrop-blur-lg rounded-2xl p-4 sm:p-6 shadow-xl ${className}`}>
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 mb-4 sm:mb-6">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-[#6C63FF]" />
-          <h2 className="text-lg sm:text-2xl font-bold text-white">ปฏิทินการจองคิวนัดซ่อม</h2>
-        </div>
         <div className="flex items-center gap-2 sm:gap-4">
           <button
             onClick={handlePrevMonth}
             className="p-1 sm:p-2 text-white hover:bg-gray-800 rounded-lg transition-colors"
           >
-            ←
+            <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
           <span className="text-sm sm:text-base text-white font-medium">
             {currentDate.toLocaleDateString('th-TH', { 
@@ -168,7 +189,7 @@ export default function CalendarBookings({ className }: CalendarBookingsProps) {
             onClick={handleNextMonth}
             className="p-1 sm:p-2 text-white hover:bg-gray-800 rounded-lg transition-colors"
           >
-            →
+            <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
         </div>
       </div>
