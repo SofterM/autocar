@@ -130,9 +130,11 @@ export default function Navbar() {
         className="container mx-auto px-4 sm:px-6 py-4 relative z-10"
       >
         <div className="flex items-center justify-between">
-          <motion.div
+        <motion.div
             className="flex items-center gap-2"
             whileHover={{ scale: 1.05 }}
+            onClick={() => router.push('/')} // เพิ่ม onClick handler
+            style={{ cursor: 'pointer' }} // เพิ่ม cursor pointer
           >
             <div className="w-10 h-10 bg-[#6C63FF] rounded-lg flex items-center justify-center">
               <FaCog className="text-white text-2xl animate-spin-slow" />
@@ -288,7 +290,7 @@ export default function Navbar() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden mt-4 bg-[#1A1B2E]/95 backdrop-blur-md rounded-lg p-4"
+              className="sticky top-0 bg-[#1A1B2E]/95 backdrop-blur-md container mx-auto px-4 sm:px-6 py-4 z-50"
             >
               <div className="flex flex-col space-y-4">
                 {menuItems.map((item) => (
