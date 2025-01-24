@@ -83,7 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         },
         { 
           icon: Calendar, 
-          label: 'การจองคิว',
+          label: 'จัดการการจอง',
           path: '/admin/appointments',
         },
         { 
