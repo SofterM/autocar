@@ -84,7 +84,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         { 
           icon: Calendar, 
           label: 'การจองคิว',
-          path: '/admin/appointment',
+          path: '/admin/appointments',
         },
         { 
           icon: MessageSquare, 
