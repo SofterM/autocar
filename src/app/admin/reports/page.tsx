@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Menu,
   Bell,
-  Download,
   CircleDollarSign,
   TrendingUp,
   Wallet,
@@ -19,6 +18,7 @@ import { ProfitTrendChart } from '@/components/financial/charts/ProfitTrendChart
 import { ServiceDistributionChart } from '@/components/financial/charts/ServiceDistributionChart';
 import { RecentTransactions } from '@/components/financial/RecentTransactions';
 import { FinancialSummaryTable } from '@/components/financial/FinancialSummaryTable';
+import { DownloadButton } from '@/components/financial/DownloadButton';
 import { MonthlyData, Transaction, Statistic } from '@/types/financial';
 
 interface UserData {
@@ -215,10 +215,7 @@ export default function FinancialReports() {
                 </p>
               </div>
 
-              <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium flex items-center gap-2 transition-colors">
-                <Download className="h-4 w-4" />
-                ดาวน์โหลด
-              </button>
+              <DownloadButton />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
