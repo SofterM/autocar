@@ -1,4 +1,3 @@
-// src/app/api/contact-channels/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import pool from '@/lib/db';
@@ -6,6 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 const ContactChannelSchema = z.object({
   id: z.string().optional(),
+  company_name: z.string(),
+  tax_id: z.string(),
   facebook: z.string(),
   line: z.string(),
   email: z.string().email(),
@@ -29,13 +30,16 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validatedData = ContactChannelSchema.parse(body);
     const id = uuidv4();
-    
+
     await pool.query(
       `INSERT INTO contact_channels (
-        id, facebook, line, email, technician_phone, manager_phone, address
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        id, company_name, tax_id, facebook, line, email, 
+        technician_phone, manager_phone, address
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
+        validatedData.company_name,
+        validatedData.tax_id,
         validatedData.facebook,
         validatedData.line,
         validatedData.email,
@@ -44,7 +48,7 @@ export async function POST(request: Request) {
         validatedData.address
       ]
     );
-    
+
     return NextResponse.json({ success: true, id });
   } catch (error) {
     console.error('Database Error:', error);
@@ -56,17 +60,15 @@ export async function PUT(request: Request) {
   try {
     const body = await request.json();
     const validatedData = ContactChannelSchema.parse(body);
-    
+
     await pool.query(
       `UPDATE contact_channels SET 
-        facebook = ?,
-        line = ?,
-        email = ?,
-        technician_phone = ?,
-        manager_phone = ?,
-        address = ?
-      WHERE id = ?`,
+        company_name = ?, tax_id = ?, facebook = ?, line = ?,
+        email = ?, technician_phone = ?, manager_phone = ?,
+        address = ? WHERE id = ?`,
       [
+        validatedData.company_name,
+        validatedData.tax_id,
         validatedData.facebook,
         validatedData.line,
         validatedData.email,
@@ -76,7 +78,7 @@ export async function PUT(request: Request) {
         validatedData.id
       ]
     );
-    
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Database Error:', error);

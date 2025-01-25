@@ -2,6 +2,8 @@ import React from 'react';
 
 interface Contact {
     id: string;
+    company_name: string;
+    tax_id: string;
     facebook: string;
     line: string;
     email: string;
@@ -37,6 +39,8 @@ export default function EditContactModal({
                 },
                 body: JSON.stringify({
                     id: contact.id,
+                    company_name: formData.get('company_name'),
+                    tax_id: formData.get('tax_id'),
                     facebook: formData.get('facebook'),
                     line: formData.get('line'),
                     email: formData.get('email'),
@@ -48,6 +52,7 @@ export default function EditContactModal({
 
             if (response.ok) {
                 onSuccess();
+                onClose();
             }
         } catch (error) {
             console.error('Error updating contact:', error);
@@ -60,6 +65,32 @@ export default function EditContactModal({
                 <div className="p-6">
                     <h2 className="text-xl font-semibold mb-4">แก้ไขข้อมูลการติดต่อ</h2>
                     <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                ชื่อบริษัท
+                            </label>
+                            <input
+                                type="text"
+                                name="company_name"
+                                defaultValue={contact.company_name}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                placeholder="ชื่อบริษัท"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                เลขประจำตัวผู้เสียภาษี
+                            </label>
+                            <input
+                                type="text"
+                                name="tax_id"
+                                defaultValue={contact.tax_id}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                placeholder="เลขประจำตัวผู้เสียภาษี"
+                            />
+                        </div>
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Facebook

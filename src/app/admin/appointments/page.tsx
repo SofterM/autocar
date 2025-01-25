@@ -101,7 +101,7 @@ export default function AdminAppointmentsPage() {
             if (!response.ok) throw new Error('Failed to fetch appointments');
             const data = await response.json();
             
-            let filteredData = data;
+            let filteredData = data as Appointment[];
             if (filters.search) {
                 const searchLower = filters.search.toLowerCase();
                 filteredData = data.filter((appointment: Appointment) => 
@@ -293,12 +293,15 @@ export default function AdminAppointmentsPage() {
                 </main>
             </div>
 
-            <ManageAppointmentModal 
-                isOpen={!!selectedAppointment}
-                onClose={() => setSelectedAppointment(null)}
-                appointment={selectedAppointment}
-                onUpdateStatus={handleUpdateStatus}
-            />
+            {selectedAppointment && (
+                <ManageAppointmentModal 
+                    isOpen={!!selectedAppointment}
+                    onClose={() => setSelectedAppointment(null)}
+                    appointment={selectedAppointment}
+                    onUpdateStatus={handleUpdateStatus}
+                    onDelete={() => console.log('Delete appointment')}
+                />
+            )}
         </div>
     );
 }
