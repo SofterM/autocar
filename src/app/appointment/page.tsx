@@ -331,7 +331,7 @@ export default function AppointmentPage() {
                </p>
                <p className="flex justify-between">
                  <span className="font-medium">รายละเอียด:</span>
-                 <span>{repairDetails || "ยังไม่ได้ระบุ"}</span>
+                 <span className="max-w-[70%] truncate">{repairDetails || "ยังไม่ได้ระบุ"}</span>
                </p>
                <p className="flex justify-between">
                  <span className="font-medium">วันที่:</span>
