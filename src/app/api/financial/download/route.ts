@@ -9,6 +9,17 @@ export async function GET(request: NextRequest) {
     try {
         connection = await pool.getConnection();
 
+        // Fetch company details
+        const [rows] = await connection.execute('SELECT * FROM contact_channels LIMIT 1') as any;
+        const companyInfo = rows[0] || {
+            company_name: '',
+            tax_id: '',
+            address: '',
+            email: '',
+            technician_phone: '',
+            manager_phone: '',
+        };
+
         // Fetch financial data
         const [results] = await connection.execute(`
             SELECT 
@@ -24,16 +35,6 @@ export async function GET(request: NextRequest) {
             LIMIT 6;
         `);
 
-        // Fetch company details (you might want to store these in a configuration)
-        const companyInfo = {
-            name: 'บริษัท ซ่อมรถยนต์ มืออาชีพ จำกัด',
-            address: '123 ถนนวิภาวดีรังสิต แขวงจตุจักร เขตจตุจักร กรุงเทพมหานคร 10900',
-            taxId: '0-1234-56789-00-0',
-            phone: '02-123-4567',
-            email: 'contact@professionalautorepair.com'
-        };
-
-        // Read font file
         const fontPath = path.join(process.cwd(), 'public/fonts/THSarabunNew.ttf');
         const fontData = fs.readFileSync(fontPath);
 
@@ -42,7 +43,6 @@ export async function GET(request: NextRequest) {
             format: 'a4'
         });
 
-        // Register custom font
         const fontBase64 = fontData.toString('base64');
         doc.addFileToVFS('THSarabunNew.ttf', fontBase64);
         doc.addFont('THSarabunNew.ttf', 'THSarabunNew', 'normal');
@@ -50,24 +50,27 @@ export async function GET(request: NextRequest) {
 
         // Company Header
         doc.setFontSize(16);
-        doc.text(companyInfo.name, 105, 20, { align: 'center' });
+        doc.text(companyInfo.company_name, 105, 20, { align: 'center' });
         
         doc.setFontSize(10);
         doc.text(companyInfo.address, 105, 28, { align: 'center' });
-        doc.text(`เลขประจำตัวผู้เสียภาษี: ${companyInfo.taxId}`, 105, 34, { align: 'center' });
-        doc.text(`โทร: ${companyInfo.phone} อีเมล: ${companyInfo.email}`, 105, 40, { align: 'center' });
+        doc.text(`เลขประจำตัวผู้เสียภาษี: ${companyInfo.tax_id}`, 105, 34, { align: 'center' });
+        doc.text(`โทร: ${companyInfo.technician_phone} อีเมล: ${companyInfo.email}`, 105, 40, { align: 'center' });
+        if (companyInfo.manager_phone) {
+            doc.text(`โทรผู้จัดการ: ${companyInfo.manager_phone}`, 105, 46, { align: 'center' });
+        }
 
         // Report Title
         doc.setFontSize(14);
-        doc.text('รายงานสรุปผลทางการเงิน', 105, 50, { align: 'center' });
-        doc.text('ประจำเดือนล่าสุด 6 เดือน', 105, 58, { align: 'center' });
+        doc.text('รายงานสรุปผลทางการเงิน', 105, 56, { align: 'center' });
+        doc.text('ประจำเดือนล่าสุด 6 เดือน', 105, 64, { align: 'center' });
 
         // Table Setup
         doc.setFontSize(12);
         const headers = ['เดือน', 'รายได้', 'ค่าใช้จ่าย', 'กำไรสุทธิ'];
         const columnWidths = [40, 40, 40, 40];
         const startX = 20;
-        let y = 70;
+        let y = 76;
 
         // Draw Table Headers
         headers.forEach((header, i) => {
@@ -91,7 +94,6 @@ export async function GET(request: NextRequest) {
                 Number(row.additional_profit)
             ).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-            // Add alternating row background
             doc.setFillColor(240, 240, 240);
             doc.rect(startX, y, 160, 10, 'F');
 
