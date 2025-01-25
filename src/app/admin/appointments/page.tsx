@@ -21,13 +21,18 @@ interface Appointment {
     };
 }
 
+interface FilterState {
+    search: string;
+    status: string;
+}
+
 export default function AdminAppointmentsPage() {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isFiltersVisible, setIsFiltersVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
-    const [filters, setFilters] = useState({
+    const [filters, setFilters] = useState<FilterState>({
         search: '',
         status: 'all'
     });
@@ -69,16 +74,16 @@ export default function AdminAppointmentsPage() {
             if (!response.ok) throw new Error('Failed to fetch appointments');
             const data = await response.json();
             
-            let filteredData = data;
+            let filteredData = data as Appointment[];
             if (filters.search) {
                 const searchLower = filters.search.toLowerCase();
-                filteredData = data.filter(appointment => 
+                filteredData = filteredData.filter((appointment: Appointment) => 
                     `${appointment.user.firstName} ${appointment.user.lastName}`.toLowerCase().includes(searchLower) ||
                     appointment.user.phone.includes(filters.search)
                 );
             }
             if (filters.status !== 'all') {
-                filteredData = filteredData.filter(appointment => appointment.status === filters.status);
+                filteredData = filteredData.filter((appointment: Appointment) => appointment.status === filters.status);
             }
             
             setAppointments(filteredData || []);
@@ -264,12 +269,15 @@ export default function AdminAppointmentsPage() {
                 </main>
             </div>
 
-            <ManageAppointmentModal 
-                isOpen={!!selectedAppointment}
-                onClose={() => setSelectedAppointment(null)}
-                appointment={selectedAppointment}
-                onUpdateStatus={handleUpdateStatus}
-            />
+            {selectedAppointment && (
+                <ManageAppointmentModal 
+                    isOpen={!!selectedAppointment}
+                    onClose={() => setSelectedAppointment(null)}
+                    appointment={selectedAppointment}
+                    onUpdateStatus={handleUpdateStatus}
+                    onDelete={() => console.log('Delete appointment')}
+                />
+            )}
         </div>
     );
 }
