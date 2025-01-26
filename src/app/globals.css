@@ -125,3 +125,8 @@ body {
 .animate-scroll {
   animation: scroll 30s linear infinite;
 }
+
+.backdrop-blur-lg {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
