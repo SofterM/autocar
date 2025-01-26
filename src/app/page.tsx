@@ -11,11 +11,11 @@ import CalendarBookings from '@/components/CalendarBookings'
 import Hero from '@/components/Hero'
 
 const TEXTS = [
-  'ระบบซ่อมบำรุงยานพาหนะ',
-  'ระบบติดตามการซ่อม',
-  'ระบบแจ้งเตือนการบำรุง',
-  'ระบบจัดการอะไหล่'
-]
+  { text: 'ระบบซ่อมบำรุงยานพาหนะ', blur: 4 },
+  { text: 'ระบบติดตามการซ่อม', blur: 3 },
+  { text: 'ระบบแจ้งเตือนการบำรุง', blur: 2 },
+  { text: 'ระบบจัดการอะไหล่', blur: 1 }
+];
 
 interface Repair {
   id: string
@@ -46,17 +46,18 @@ export default function Home() {
   const [repairs, setRepairs] = useState<Repair[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [error, setError] = useState('')
+  const [blur, setBlur] = useState(TEXTS[0].blur);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
       setIndex((prevIndex) => {
-        const newIndex = (prevIndex + 1) % TEXTS.length
-        setCurrentText(TEXTS[newIndex])
-        return newIndex
-      })
-    }, 3000)
-    return () => clearInterval(intervalId)
-  }, [])
+        const newIndex = (prevIndex + 1) % TEXTS.length;
+        setBlur(TEXTS[newIndex].blur);
+        return newIndex;
+      });
+    }, 3000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   const debouncedSearch = debounce(async (query: string) => {
     if (!query.trim()) {
@@ -133,22 +134,22 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight tracking-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-6xl font-semibold text-white mb-4 sm:mb-6 leading-tight tracking-tight">
                 ระบบจัดการคุณภาพ
                 <AnimatePresence mode='wait'>
-                  <motion.div
-                    key={currentText}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                    className="overflow-hidden h-12 sm:h-16 lg:h-24"
-                  >
-                    <span className="block mt-2 text-[#6C63FF] text-4xl sm:text-5xl lg:text-7xl font-extrabold">
-                      {currentText}
-                    </span>
-                  </motion.div>
-                </AnimatePresence>
+    <motion.div
+      key={TEXTS[currentIndex].text}
+      initial={{ opacity: 0, y: 20, filter: `blur(${blur * 2}px)` }}
+      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      exit={{ opacity: 0, y: -20, filter: `blur(${blur * 2}px)` }}
+      transition={{ duration: 0.5 }}
+      className="overflow-hidden h-12 sm:h-16 lg:h-24"
+    >
+      <span className="block mt-2 text-[#6C63FF] text-4xl sm:text-5xl lg:text-7xl font-semibold">
+        {TEXTS[currentIndex].text}
+      </span>
+    </motion.div>
+  </AnimatePresence>
                 และบริการ
               </h1>
               
