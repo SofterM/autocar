@@ -98,7 +98,7 @@ export default function Navbar() {
     const baseMenuItems = [
       { name: 'หน้าแรก', path: '/' },
       { name: 'จองคิว', path: '/appointment' },
-      { name: 'ช่องทางการติดต่อ', path: '/contact' },
+      { name: 'ช่องทางการติดต่อ', path: '/contact' }
     ]
 
     if (user && (user.role === 'admin' || user.role === 'technician')) {
@@ -236,17 +236,11 @@ export default function Navbar() {
                       exit={{ opacity: 0, y: 10 }}
                       className="absolute right-0 mt-2 w-48 rounded-lg bg-white shadow-lg py-2"
                     >
+                      
                       <button
-                        className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                        onClick={() => {/* Handle profile click */}}
-                      >
-                        <User size={16} />
-                        <span>โปรไฟล์</span>
-                      </button>
-                      <button
-  className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-  onClick={() => router.push('/setting')}  // เปลี่ยนตรงนี้
->
+                          className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                          onClick={() => router.push('/setting')} 
+                        >
                         <Settings size={16} />
                         <span>ตั้งค่า</span>
                       </button>
@@ -312,17 +306,11 @@ export default function Navbar() {
                       <div className="px-4 py-2 text-gray-300">
                         {user.firstName} {user.lastName}
                       </div>
+                      
                       <button
-                        className="w-full px-4 py-2 text-left text-gray-300 hover:text-white flex items-center space-x-2"
-                        onClick={() => {/* Handle profile click */}}
-                      >
-                        <User size={16} />
-                        <span>โปรไฟล์</span>
-                      </button>
-                      <button
-  className="w-full px-4 py-2 text-left text-gray-300 hover:text-white flex items-center space-x-2"
-  onClick={() => router.push('/setting')}  // เปลี่ยนตรงนี้
->
+                          className="w-full px-4 py-2 text-left text-gray-300 hover:text-white flex items-center space-x-2"
+                          onClick={() => router.push('/setting')}  // เปลี่ยนตรงนี้
+                        >
                         <Settings size={16} />
                         <span>ตั้งค่า</span>
                       </button>
