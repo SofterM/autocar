@@ -9,6 +9,8 @@ import Footer from '@/components/Footer'
 import debounce from 'lodash/debounce'
 import CalendarBookings from '@/components/CalendarBookings'
 import Hero from '@/components/Hero'
+import WhyChooseUs from '@/components/WhyChooseUs'
+import ScrollingServices from '@/components/ScrollingServices'
 
 const TEXTS = [
   { text: 'ระบบซ่อมบำรุงยานพาหนะ', blur: 4 },
@@ -337,10 +339,11 @@ export default function Home() {
         </main>
         
       </div>
-      <div className="flex flex-col gap-24">
-  <CalendarBookings className="mt-2 max-w-4xl mx-auto" />
+      
+  <CalendarBookings />
+  <ScrollingServices />
+  <WhyChooseUs />
   <Footer />
-</div>
     </div>
   )
 }

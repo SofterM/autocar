@@ -170,7 +170,7 @@ function CalendarBookings({ className }: CalendarBookingsProps) {
   }
 
   return (
-    <div className={`bg-gray-900/95 backdrop-blur-lg rounded-2xl p-4 sm:p-6 shadow-xl ${className}`}>
+    <div className={`bg-gray-900/95 backdrop-blur-lg rounded-2xl p-4 sm:p-6 mb-20 shadow-xl ${className}`}>
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 mb-4 sm:mb-6">
         <div className="flex items-center gap-2 sm:gap-4">
           <button
