@@ -104,10 +104,11 @@ export default function AdminAppointmentsPage() {
             let filteredData = data as Appointment[];
             if (filters.search) {
                 const searchLower = filters.search.toLowerCase();
-                filteredData = data.filter((appointment: Appointment) => 
-                    `${appointment.user.firstName} ${appointment.user.lastName}`.toLowerCase().includes(searchLower) ||
-                    appointment.user.phone.includes(filters.search)
-                );
+                filteredData = data.filter((appointment: Appointment) => {
+                    const fullName = `${appointment.user?.firstName ?? ''} ${appointment.user?.lastName ?? ''}`.toLowerCase();
+                    const phone = appointment.user?.phone ?? '';
+                    return fullName.includes(searchLower) || phone.includes(filters.search);
+                });
             }
             if (filters.status !== 'all') {
                 filteredData = filteredData.filter((appointment: Appointment) => 
@@ -126,7 +127,19 @@ export default function AdminAppointmentsPage() {
 
     const handleUpdateStatus = async (id: number, status: string) => {
         try {
-            await fetchAppointments();
+            const response = await fetch(`/api/appointments/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update appointment status');
+            }
+
+            await fetchAppointments(); // Refresh the appointments list
         } catch (error) {
             console.error('Error updating status:', error);
         }
@@ -140,13 +153,46 @@ export default function AdminAppointmentsPage() {
         return STATUS_STYLES[status as keyof typeof STATUS_STYLES]?.text ?? status;
     };
 
+    // Mobile Card View Component
+    const AppointmentCard = ({ appointment }: { appointment: Appointment }) => (
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 space-y-3">
+            <div className="flex justify-between items-start">
+                <div>
+                    <h3 className="font-medium text-gray-900">
+                        {appointment.user?.firstName ?? 'ไม่ระบุ'} {appointment.user?.lastName ?? ''}
+                    </h3>
+                    <p className="text-sm text-gray-500">{appointment.user?.phone ?? 'ไม่ระบุเบอร์โทร'}</p>
+                </div>
+                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusStyle(appointment.status)}`}>
+                    {getStatusText(appointment.status)}
+                </span>
+            </div>
+            <div>
+                <p className="text-sm text-gray-900">{appointment.service}</p>
+                <p className="text-sm text-gray-500 mt-1 line-clamp-2">{appointment.repair_details}</p>
+            </div>
+            <div className="flex justify-between items-center text-sm text-gray-500">
+                <div>
+                    <p>{formatDate(appointment.appointment_date)}</p>
+                    <p>{appointment.appointment_time}</p>
+                </div>
+                <button 
+                    onClick={() => setSelectedAppointment(appointment)}
+                    className="text-blue-600 hover:text-blue-900"
+                >
+                    จัดการ
+                </button>
+            </div>
+        </div>
+    );
+
     const renderStatistics = () => (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {Object.values(statistics).map((stat, index) => (
-                <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 lg:p-6">
+                <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                     <div className="flex items-center justify-between">
                         <span className={`p-3 rounded-xl ${stat.color} text-white`}>
-                            <stat.icon className="h-5 w-5 lg:h-6 lg:w-6" />
+                            <stat.icon className="h-5 w-5" />
                         </span>
                     </div>
                     <div className="mt-4">
@@ -171,14 +217,14 @@ export default function AdminAppointmentsPage() {
                         placeholder="ค้นหาด้วยชื่อ, เบอร์โทร..."
                         value={filters.search}
                         onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                        className="pl-10 pr-4 py-2 w-full bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="pl-10 pr-4 py-2 w-full border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                 </div>
                 <div className="flex items-center gap-2">
                     <select
                         value={filters.status}
                         onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                        className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                         <option value="all">สถานะทั้งหมด ({appointments.length})</option>
                         {Object.entries(STATUS_STYLES).map(([status, { text }]) => (
@@ -192,56 +238,68 @@ export default function AdminAppointmentsPage() {
         </div>
     );
 
-    const renderAppointmentsTable = () => (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ผู้จอง</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-80">บริการ</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">เวลา</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การจัดการ</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {appointments.map((appointment) => (
-                            <tr key={appointment.id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm font-medium text-gray-900">
-                                        {appointment.user.firstName} {appointment.user.lastName}
-                                    </div>
-                                    <div className="text-sm text-gray-500">{appointment.user.phone}</div>
-                                </td>
-                                <td className="px-6 py-4 w-80">
-                                    <div className="text-sm text-gray-900 max-w-xs">{appointment.service}</div>
-                                    <div className="text-sm text-gray-500 mt-1 line-clamp-2 max-w-xs">{appointment.repair_details}</div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm text-gray-900">{formatDate(appointment.appointment_date)}</div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm text-gray-900">{appointment.appointment_time}</div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusStyle(appointment.status)}`}>
-                                        {getStatusText(appointment.status)}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <button 
-                                        onClick={() => setSelectedAppointment(appointment)}
-                                        className="text-blue-600 hover:text-blue-900"
-                                    >
-                                        จัดการ
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+    const renderAppointments = () => (
+        <div className="space-y-4">
+            {/* Desktop Table View */}
+            <div className="hidden lg:block">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ผู้จอง</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-80">บริการ</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">เวลา</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การจัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {appointments.map((appointment) => (
+                                    <tr key={appointment.id} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm font-medium text-gray-900">
+                                                {appointment.user?.firstName ?? 'ไม่ระบุ'} {appointment.user?.lastName ?? ''}
+                                            </div>
+                                            <div className="text-sm text-gray-500">{appointment.user?.phone ?? 'ไม่ระบุเบอร์โทร'}</div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="text-sm text-gray-900">{appointment.service}</div>
+                                            <div className="text-sm text-gray-500 mt-1 line-clamp-2">{appointment.repair_details}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-900">{formatDate(appointment.appointment_date)}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-900">{appointment.appointment_time}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusStyle(appointment.status)}`}>
+                                                {getStatusText(appointment.status)}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <button 
+                                                onClick={() => setSelectedAppointment(appointment)}
+                                                className="text-blue-600 hover:text-blue-900"
+                                            >
+                                                จัดการ
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="lg:hidden space-y-4">
+                {appointments.map((appointment) => (
+                    <AppointmentCard key={appointment.id} appointment={appointment} />
+                ))}
             </div>
         </div>
     );
@@ -260,7 +318,7 @@ export default function AdminAppointmentsPage() {
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                                className="p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden"
                             >
                                 <Menu className="h-5 w-5 text-gray-700" />
                             </button>
@@ -289,7 +347,17 @@ export default function AdminAppointmentsPage() {
                 <main className="p-4 lg:p-6 space-y-6">
                     {renderStatistics()}
                     {renderFilters()}
-                    {renderAppointmentsTable()}
+                    {isLoading ? (
+                        <div className="flex justify-center items-center h-32">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                        </div>
+                    ) : appointments.length === 0 ? (
+                        <div className="text-center py-12">
+                            <p className="text-gray-500">ไม่พบข้อมูลการจอง</p>
+                        </div>
+                    ) : (
+                        renderAppointments()
+                    )}
                 </main>
             </div>
 
