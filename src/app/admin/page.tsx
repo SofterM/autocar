@@ -71,33 +71,29 @@ const AdminDashboard = () => {
     pending: { class: 'bg-yellow-100 text-yellow-800', text: 'รอดำเนินการ' },
     confirmed: { class: 'bg-blue-100 text-blue-800', text: 'ยืนยันแล้ว' },
     cancelled: { class: 'bg-red-100 text-red-800', text: 'ยกเลิก' }
-};
+  };
 
-const getTodayAppointments = (appointments: Appointment[]) => {
-  const today = new Date();
-  today.setUTCHours(today.getUTCHours() + 7); // ปรับเป็น timezone ไทย (+7)
-  const todayStr = today.toISOString().split('T')[0];
-  
-  console.log('Today in Thai timezone:', todayStr);
-  
-  return appointments
-      .filter(appointment => {
-          const appointmentDate = appointment.appointment_date.split('T')[0];
-          console.log('Appointment date:', appointmentDate);
-          return appointmentDate === todayStr;
-      })
-      .sort((a, b) => a.appointment_time.localeCompare(b.appointment_time))
-      .slice(0, 3)
-      .map(appointment => ({
-          id: appointment.id,
-          time: appointment.appointment_time,
-          customerName: `${appointment.user?.firstName || ''} ${appointment.user?.lastName || ''}`.trim() || 'ไม่ระบุ',
-          phone: appointment.user?.phone || 'ไม่ระบุ',
-          service: appointment.service || 'ไม่ระบุ',
-          repair_details: appointment.repair_details || '',
-          status: appointment.status
-      }));
-};
+  const getTodayAppointments = (appointments: Appointment[]) => {
+    const today = new Date();
+    today.setUTCHours(today.getUTCHours() + 7); // ปรับเป็น timezone ไทย (+7)
+    const todayStr = today.toISOString().split('T')[0];
+    
+    return appointments
+        .filter(appointment => {
+            const appointmentDate = appointment.appointment_date.split('T')[0];
+            return appointmentDate === todayStr;
+        })
+        .sort((a, b) => a.appointment_time.localeCompare(b.appointment_time))
+        .map(appointment => ({
+            id: appointment.id,
+            time: appointment.appointment_time,
+            customerName: `${appointment.user?.firstName || ''} ${appointment.user?.lastName || ''}`.trim() || 'ไม่ระบุ',
+            phone: appointment.user?.phone || 'ไม่ระบุ',
+            service: appointment.service || 'ไม่ระบุ',
+            repair_details: appointment.repair_details || '',
+            status: appointment.status
+        }));
+  };
 
   const fetchAppointments = async () => {
     try {
@@ -161,7 +157,6 @@ const getTodayAppointments = (appointments: Appointment[]) => {
       .sort((a: Repair, b: Repair) => 
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       )
-      .slice(0, 3)
       .map((repair: Repair) => ({
         id: repair.id,
         customer: repair.customer?.name,
@@ -323,40 +318,42 @@ const getTodayAppointments = (appointments: Appointment[]) => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Recent Repairs */}
-              <div className="lg:col-span-2 bg-white rounded-xl shadow-sm">
-                <div className="p-4 lg:p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-lg font-bold text-gray-900">งานซ่อมล่าสุด</h2>
-                    <button 
-                      onClick={() => router.push('/admin/repairs')}
-                      className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
-                    >
-                      ดูทั้งหมด
-                    </button>
-                  </div>
-                  <div className="space-y-4">
-                    {recentRepairs.map((repair) => (
-                      <div key={repair.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors gap-4">
-                        <div className="space-y-1">
-                          <p className="font-medium text-gray-900">{repair.customer}</p>
-                          <p className="text-sm text-gray-600">{repair.carModel}</p>
-                          <div className="flex items-center gap-2 text-sm flex-wrap">
-                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${repair.statusColor}`}>
-                              {repair.status}
-                            </span>
-                            <span className="text-gray-500">• {repair.assignedTo}</span>
-                          </div>
-                        </div>
-                        <div className="text-left sm:text-right">
-                          <p className="text-sm font-medium text-gray-900">{repair.service || '-'}</p>
-                          <p className="text-sm text-gray-500 mt-1">{repair.timeLeft}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+  {/* Recent Repairs */}
+  <div className="lg:col-span-2 bg-white rounded-xl shadow-sm">
+    <div className="p-4 lg:p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-bold text-gray-900">งานซ่อมล่าสุด</h2>
+        <button 
+          onClick={() => router.push('/admin/repairs')}
+          className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+        >
+          ดูทั้งหมด
+        </button>
+      </div>
+      <div className="max-h-96 overflow-y-auto pr-2">
+        <div className="space-y-4">
+          {recentRepairs.map((repair) => (
+            <div key={repair.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors gap-4">
+              <div className="space-y-1">
+                <p className="font-medium text-gray-900">{repair.customer}</p>
+                <p className="text-sm text-gray-600">{repair.carModel}</p>
+                <div className="flex items-center gap-2 text-sm flex-wrap">
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${repair.statusColor}`}>
+                    {repair.status}
+                  </span>
+                  <span className="text-gray-500">• {repair.assignedTo}</span>
                 </div>
               </div>
+              <div className="text-left sm:text-right">
+                <p className="text-sm font-medium text-gray-900">{repair.service || '-'}</p>
+                <p className="text-sm text-gray-500 mt-1">{repair.timeLeft}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
 
               {/* Upcoming Appointments */}
               <div className="bg-white rounded-xl shadow-sm">
@@ -370,32 +367,34 @@ const getTodayAppointments = (appointments: Appointment[]) => {
                       ดูทั้งหมด
                     </button>
                   </div>
-                  <div className="space-y-4">
-                    {todayAppointments.map((appointment) => (
-                      <div key={appointment.id} 
-                        className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors gap-4"
-                      >
-                        <div className="space-y-1">
-                          <p className="font-medium text-gray-900">{appointment.customerName}</p>
-                          <p className="text-sm text-gray-600">{appointment.phone}</p>
-                          <div className="flex items-center gap-2 text-sm flex-wrap">
-                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[appointment.status as keyof typeof STATUS_STYLES]?.class || 'bg-gray-100 text-gray-800'}`}>
-                            {STATUS_STYLES[appointment.status as keyof typeof STATUS_STYLES]?.text || 'ไม่ระบุ'}
-                          </span>
-                            <span className="text-gray-500">• {appointment.time}</span>
+                  <div className="max-h-96 overflow-y-auto pr-2">
+                    <div className="space-y-4">
+                      {todayAppointments.map((appointment) => (
+                        <div key={appointment.id} 
+                          className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors gap-4"
+                        >
+                          <div className="space-y-1">
+                            <p className="font-medium text-gray-900">{appointment.customerName}</p>
+                            <p className="text-sm text-gray-600">{appointment.phone}</p>
+                            <div className="flex items-center gap-2 text-sm flex-wrap">
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[appointment.status as keyof typeof STATUS_STYLES]?.class || 'bg-gray-100 text-gray-800'}`}>
+                                {STATUS_STYLES[appointment.status as keyof typeof STATUS_STYLES]?.text || 'ไม่ระบุ'}
+                              </span>
+                              <span className="text-gray-500">• {appointment.time}</span>
+                            </div>
+                          </div>
+                          <div className="text-left sm:text-right">
+                            <p className="text-sm font-medium text-gray-900 line-clamp-2">{appointment.service}</p>
+                            <p className="text-sm text-gray-500 mt-1">{appointment.repair_details}</p>
                           </div>
                         </div>
-                        <div className="text-left sm:text-right">
-                          <p className="text-sm font-medium text-gray-900 line-clamp-2">{appointment.service}</p>
-                          <p className="text-sm text-gray-500 mt-1">{appointment.repair_details}</p>
+                      ))}
+                      {todayAppointments.length === 0 && (
+                        <div className="text-center py-6 border border-gray-100 rounded-lg">
+                          <p className="text-sm text-gray-500">ไม่มีนัดหมายในวันนี้</p>
                         </div>
-                      </div>
-                    ))}
-                    {todayAppointments.length === 0 && (
-                      <div className="text-center py-6 border border-gray-100 rounded-lg">
-                        <p className="text-sm text-gray-500">ไม่มีนัดหมายในวันนี้</p>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
