@@ -193,7 +193,7 @@ export default function ContactPage() {
                     <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center">
                       <Map className="w-6 h-6 text-[#6C63FF]" />
                     </div>
-                    <h3 className="text-xl font-semibold text-white">แผนที่</h3>
+                    <h3 className="text-xl font-semibold text-white">ที่แผน</h3>
                   </div>
                   <div className="aspect-video rounded-xl overflow-hidden border border-gray-700/50">
                     <iframe
