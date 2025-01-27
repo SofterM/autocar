@@ -94,6 +94,28 @@ export default function AdminAppointmentsPage() {
         });
     };
 
+    const sortAppointments = (appointments: Appointment[]) => {
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+
+        return appointments.sort((a, b) => {
+            const dateA = new Date(a.appointment_date);
+            const dateB = new Date(b.appointment_date);
+            
+            // Check if dates are in the past
+            const isAPast = dateA < now;
+            const isBPast = dateB < now;
+
+            if (isAPast && !isBPast) return 1;  // A is past, B is future -> B comes first
+            if (!isAPast && isBPast) return -1; // A is future, B is past -> A comes first
+            
+            // If both are past or both are future, sort by closest date first
+            return isAPast 
+                ? dateA.getTime() - dateB.getTime()  // For past dates, older goes later
+                : dateA.getTime() - dateB.getTime(); // For future dates, closer date comes first
+        });
+    };
+
     const fetchAppointments = async () => {
         try {
             setIsLoading(true);
@@ -116,7 +138,9 @@ export default function AdminAppointmentsPage() {
                 );
             }
             
-            setAppointments(filteredData);
+            // Sort the appointments
+            const sortedData = sortAppointments(filteredData);
+            setAppointments(sortedData);
         } catch (error) {
             console.error('Error fetching appointments:', error);
             setAppointments([]);
@@ -139,7 +163,7 @@ export default function AdminAppointmentsPage() {
                 throw new Error('Failed to update appointment status');
             }
 
-            await fetchAppointments(); // Refresh the appointments list
+            await fetchAppointments();
         } catch (error) {
             console.error('Error updating status:', error);
         }
@@ -153,7 +177,6 @@ export default function AdminAppointmentsPage() {
         return STATUS_STYLES[status as keyof typeof STATUS_STYLES]?.text ?? status;
     };
 
-    // Mobile Card View Component
     const AppointmentCard = ({ appointment }: { appointment: Appointment }) => (
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 space-y-3">
             <div className="flex justify-between items-start">
