@@ -6,13 +6,19 @@ import { verifyAuth } from '@/lib/auth'
 import { z } from 'zod'
 import { UserRow } from '@/types/user'
 
-const updateProfileSchema = z.object({
-  firstName: z.string().min(2, 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร'),
-  lastName: z.string().min(2, 'นามสกุลต้องมีอย่างน้อย 2 ตัวอักษร'),
-  phone: z.string().min(10, 'เบอร์โทรไม่ถูกต้อง').nullish(),
-  currentPassword: z.string().optional(),
-  newPassword: z.string().min(6, 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร').optional()
-}).strict();
+const updateProfileSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('profile'),
+    firstName: z.string().min(2, 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร'),
+    lastName: z.string().min(2, 'นามสกุลต้องมีอย่างน้อย 2 ตัวอักษร'),
+    phone: z.string().min(10, 'เบอร์โทรไม่ถูกต้อง').nullish(),
+  }),
+  z.object({
+    type: z.literal('password'),
+    currentPassword: z.string().min(1, 'กรุณาระบุรหัสผ่านปัจจุบัน'),
+    newPassword: z.string().min(6, 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'),
+  })
+]);
 
 export async function PUT(req: NextRequest) {
   try {
@@ -32,7 +38,7 @@ export async function PUT(req: NextRequest) {
       'SELECT * FROM users WHERE id = ?',
       [userId]
     )
-    
+   
     const user = users[0]
     if (!user) {
       return NextResponse.json(
@@ -41,15 +47,8 @@ export async function PUT(req: NextRequest) {
       )
     }
 
-    // Check current password if trying to change password
-    if (data.newPassword) {
-      if (!data.currentPassword) {
-        return NextResponse.json(
-          { error: 'กรุณาระบุรหัสผ่านปัจจุบัน' },
-          { status: 400 }
-        )
-      }
-
+    if (data.type === 'password') {
+      // Check current password if trying to change password
       const validPassword = await bcrypt.compare(data.currentPassword, user.password_hash)
       if (!validPassword) {
         return NextResponse.json(
@@ -57,22 +56,20 @@ export async function PUT(req: NextRequest) {
           { status: 400 }
         )
       }
-    }
 
-    // Update user profile
-    let query = 'UPDATE users SET first_name = ?, last_name = ?, phone = ?'
-    const params: any[] = [data.firstName, data.lastName, data.phone]
-
-    if (data.newPassword) {
+      // Update password
       const hashedPassword = await bcrypt.hash(data.newPassword, 10)
-      query += ', password_hash = ?'
-      params.push(hashedPassword)
+      await pool.execute(
+        'UPDATE users SET password_hash = ? WHERE id = ?',
+        [hashedPassword, userId]
+      )
+    } else {
+      // Update profile
+      await pool.execute(
+        'UPDATE users SET first_name = ?, last_name = ?, phone = ? WHERE id = ?',
+        [data.firstName, data.lastName, data.phone, userId]
+      )
     }
-
-    query += ' WHERE id = ?'
-    params.push(userId)
-
-    await pool.execute(query, params)
 
     // Fetch updated user
     const [updatedUsers] = await pool.execute<UserRow[]>(
@@ -83,7 +80,7 @@ export async function PUT(req: NextRequest) {
     const updatedUser = updatedUsers[0]
     return NextResponse.json({
       id: updatedUser.id,
-      email: updatedUser.email, 
+      email: updatedUser.email,
       firstName: updatedUser.first_name,
       lastName: updatedUser.last_name,
       role: updatedUser.role,
