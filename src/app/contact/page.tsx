@@ -40,185 +40,179 @@ export default function ContactPage() {
  }, []);
 
  return (
-   <div className="flex flex-col min-h-screen">
-     <StarryBackground />
-     <div className="relative flex-1">
-       <div className="absolute inset-0 bg-gradient-to-b from-blue-900/20 to-transparent pointer-events-none" />
-       <Navbar />
-       
-       <main className="flex-1 container mx-auto px-4 py-24">
-         <motion.div
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           className="max-w-6xl mx-auto"
-         >
-           <div className="text-center mb-16">
-             <motion.h1 
-               initial={{ opacity: 0, y: -20 }}
-               animate={{ opacity: 1, y: 0 }}
-               className="text-5xl font-bold text-white mb-6"
-             >
-               ติดต่อเรา
-             </motion.h1>
-             <motion.p 
-               initial={{ opacity: 0 }}
-               animate={{ opacity: 1 }}
-               transition={{ delay: 0.2 }}
-               className="text-gray-400 text-lg"
-             >
-               พร้อมให้บริการและตอบคำถามทุกความต้องการของคุณ
-             </motion.p>
-           </div>
-
-           {isLoading ? (
-             <div className="flex justify-center items-center min-h-[400px]">
-               <div className="animate-spin h-8 w-8 border-4 border-[#6C63FF] border-t-transparent rounded-full" />
-             </div>
-           ) : contactInfo && (
-             <div className="space-y-12">
-               <motion.div 
-                 initial={{ opacity: 0, y: 20 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 className="bg-gray-800 p-8 rounded-2xl border border-gray-700"
-               >
-                 <div className="grid md:grid-cols-2 gap-8">
-                   <div className="space-y-6">
-                     <div className="flex items-start gap-4">
-                       <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center">
-                         <Building2 className="w-6 h-6 text-[#6C63FF]" />
-                       </div>
-                       <div>
-                         <h3 className="text-xl font-semibold text-white mb-2">{contactInfo.company_name}</h3>
-                         <p className="text-gray-400">เลขประจำตัวผู้เสียภาษี: {contactInfo.tax_id}</p>
-                       </div>
-                     </div>
-                     
-                     <div className="flex items-start gap-4">
-                       <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center">
-                         <Mail className="w-6 h-6 text-[#6C63FF]" />
-                       </div>
-                       <div>
-                         <h3 className="text-lg font-semibold text-white mb-2">อีเมล</h3>
-                         <a href={`mailto:${contactInfo.email}`} className="text-[#6C63FF] hover:underline">
-                           {contactInfo.email}
-                         </a>
-                       </div>
-                     </div>
-                   </div>
-
-                   <div className="space-y-6">
-                     <div className="flex items-start gap-4">
-                       <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center">
-                         <Phone className="w-6 h-6 text-[#6C63FF]" />
-                       </div>
-                       <div>
-                         <h3 className="text-lg font-semibold text-white mb-3">เบอร์ติดต่อ</h3>
-                         <div className="space-y-2">
-                           <p className="text-gray-400">
-                             <span className="text-sm text-gray-500">ฝ่ายช่าง:</span><br />
-                             {contactInfo.technician_phone}
-                           </p>
-                           <p className="text-gray-400">
-                             <span className="text-sm text-gray-500">ผู้จัดการ:</span><br />
-                             {contactInfo.manager_phone}
-                           </p>
-                         </div>
-                       </div>
-                     </div>
-                   </div>
-                 </div>
-               </motion.div>
-
-               <div className="grid md:grid-cols-3 gap-6">
-                 <motion.div
-                   initial={{ opacity: 0, y: 20 }}
-                   animate={{ opacity: 1, y: 0 }}
-                   transition={{ delay: 0.1 }}
-                   className="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-[#6C63FF]/50 transition-all duration-300"
-                 >
-                   <div className="flex items-start gap-4">
-                     <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center">
-                       <MapPin className="w-6 h-6 text-[#6C63FF]" />
-                     </div>
-                     <div>
-                       <h3 className="text-lg font-semibold text-white mb-2">ที่อยู่</h3>
-                       <p className="text-gray-400">{contactInfo.address}</p>
-                     </div>
-                   </div>
-                 </motion.div>
-
-                 <motion.div
-                   initial={{ opacity: 0, y: 20 }}
-                   animate={{ opacity: 1, y: 0 }}
-                   transition={{ delay: 0.2 }}
-                   className="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-[#6C63FF]/50 transition-all duration-300"
-                 >
-                   <div className="flex items-start gap-4">
-                     <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center">
-                       <Facebook className="w-6 h-6 text-[#6C63FF]" />
-                     </div>
-                     <div>
-                       <h3 className="text-lg font-semibold text-white mb-2">Facebook</h3>
-                       <a 
-                         href={contactInfo.facebook}
-                         target="_blank"
-                         rel="noopener noreferrer"
-                         className="text-[#6C63FF] hover:underline"
-                       >
-                         {contactInfo.facebook}
-                       </a>
-                     </div>
-                   </div>
-                 </motion.div>
-
-                 <motion.div
-                   initial={{ opacity: 0, y: 20 }}
-                   animate={{ opacity: 1, y: 0 }}
-                   transition={{ delay: 0.3 }}
-                   className="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-[#6C63FF]/50 transition-all duration-300"
-                 >
-                   <div className="flex items-start gap-4">
-                     <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center">
-                       <Send className="w-6 h-6 text-[#6C63FF]" />
-                     </div>
-                     <div>
-                       <h3 className="text-lg font-semibold text-white mb-2">Line</h3>
-                       <p className="text-gray-400">{contactInfo.line}</p>
-                     </div>
-                   </div>
-                 </motion.div>
-               </div>
-
-               <motion.div
-                 initial={{ opacity: 0 }}
-                 animate={{ opacity: 1 }}
-                 transition={{ delay: 0.4 }}
-                 className="bg-gray-800 p-8 rounded-2xl border border-gray-700 mt-8"
-               >
-                 <div className="flex items-center gap-4 mb-6">
-                   <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center">
-                     <Map className="w-6 h-6 text-[#6C63FF]" />
-                   </div>
-                   <h3 className="text-xl font-semibold text-white">แผนที่</h3>
-                 </div>
-                 <div className="aspect-video rounded-xl overflow-hidden">
-                   <iframe
-                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3..."
-                     width="100%"
-                     height="100%"
-                     style={{ border: 0 }}
-                     allowFullScreen
-                     loading="lazy"
-                     referrerPolicy="no-referrer-when-downgrade"
-                   />
-                 </div>
-               </motion.div>
-             </div>
-           )}
-         </motion.div>
-       </main>
-     </div>
-     <Footer />
-   </div>
- );
-}
+    <div className="flex flex-col min-h-screen">
+      <StarryBackground />
+      <div className="relative flex-1">
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/20 to-transparent pointer-events-none" />
+        <Navbar />
+        
+        <main className="flex-1 container mx-auto px-4 py-24">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-6xl mx-auto"
+          >
+            <div className="text-center mb-16">
+              <motion.h1 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#6C63FF] to-blue-500 mb-6"
+              >
+                ติดต่อเรา
+              </motion.h1>
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-gray-400 text-lg"
+              >
+                พร้อมให้บริการและตอบคำถามทุกความต้องการของคุณ
+              </motion.p>
+            </div>
+ 
+            {isLoading ? (
+              <div className="flex justify-center items-center min-h-[400px]">
+                <div className="animate-spin h-8 w-8 border-4 border-[#6C63FF] border-t-transparent rounded-full" />
+              </div>
+            ) : contactInfo && (
+              <div className="space-y-12">
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-2xl border border-gray-700/50 shadow-lg"
+                >
+                  <div className="grid md:grid-cols-2 gap-8">
+                    {/* Company Info Section */}
+                    <div className="space-y-6">
+                      <div className="group">
+                        <div className="flex items-start gap-4 bg-black/20 p-6 rounded-xl border border-gray-700/50 hover:border-[#6C63FF]/50 transition-all duration-300">
+                          <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center group-hover:bg-[#6C63FF]/20 transition-colors">
+                            <Building2 className="w-6 h-6 text-[#6C63FF]" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-[#6C63FF] transition-colors">{contactInfo.company_name}</h3>
+                            <p className="text-gray-400">เลขประจำตัวผู้เสียภาษี: {contactInfo.tax_id}</p>
+                          </div>
+                        </div>
+                      </div>
+ 
+                      <div className="group">
+                        <div className="flex items-start gap-4 bg-black/20 p-6 rounded-xl border border-gray-700/50 hover:border-[#6C63FF]/50 transition-all duration-300">
+                          <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center group-hover:bg-[#6C63FF]/20 transition-colors">
+                            <Mail className="w-6 h-6 text-[#6C63FF]" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[#6C63FF] transition-colors">อีเมล</h3>
+                            <a href={`mailto:${contactInfo.email}`} className="text-[#6C63FF] hover:underline">
+                              {contactInfo.email}
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+ 
+                    {/* Phone Section */}
+                    <div className="space-y-6">
+                      <div className="group">
+                        <div className="flex items-start gap-4 bg-black/20 p-6 rounded-xl border border-gray-700/50 hover:border-[#6C63FF]/50 transition-all duration-300">
+                          <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center group-hover:bg-[#6C63FF]/20 transition-colors">
+                            <Phone className="w-6 h-6 text-[#6C63FF]" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-white mb-3 group-hover:text-[#6C63FF] transition-colors">เบอร์ติดต่อ</h3>
+                            <div className="space-y-2">
+                              <p className="text-gray-400">
+                                <span className="text-sm text-gray-500">ฝ่ายช่าง:</span><br />
+                                {contactInfo.technician_phone}
+                              </p>
+                              <p className="text-gray-400">
+                                <span className="text-sm text-gray-500">ผู้จัดการ:</span><br />
+                                {contactInfo.manager_phone}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+ 
+                {/* Contact Cards */}
+                <div className="grid md:grid-cols-3 gap-6">
+                  {[
+                    { icon: MapPin, title: 'ที่อยู่', content: contactInfo.address },
+                    { 
+                      icon: Facebook, 
+                      title: 'Facebook', 
+                      content: contactInfo.facebook,
+                      isLink: true 
+                    },
+                    { icon: Send, title: 'Line', content: contactInfo.line }
+                  ].map((item, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 * (index + 1) }}
+                      className="group bg-gradient-to-br from-gray-900 to-gray-800 p-6 rounded-xl border border-gray-700/50 hover:border-[#6C63FF]/50 transition-all duration-300 shadow-lg"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center group-hover:bg-[#6C63FF]/20 transition-colors">
+                          <item.icon className="w-6 h-6 text-[#6C63FF]" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[#6C63FF] transition-colors">
+                            {item.title}
+                          </h3>
+                          {item.isLink ? (
+                            <a 
+                              href={item.content}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#6C63FF] hover:underline"
+                            >
+                              {item.content}
+                            </a>
+                          ) : (
+                            <p className="text-gray-400">{item.content}</p>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+ 
+                {/* Map Section */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-2xl border border-gray-700/50 shadow-lg"
+                >
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center">
+                      <Map className="w-6 h-6 text-[#6C63FF]" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-white">ที่แผน</h3>
+                  </div>
+                  <div className="aspect-video rounded-xl overflow-hidden border border-gray-700/50">
+                    <iframe
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1121.3480258256152!2d99.92550294634958!3d19.03072864864562!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30d83369a5508b77%3A0xab770e6e1fa013c6!2z4Lib4LmJ4Liy4Lii4Lir4LiZ4LmJ4Liy4Lih4Lir4Liy4Lin4Li04LiX4Lii4Liy4Lil4Lix4Lii4Lie4Liw4LmA4Lii4Liy!5e0!3m2!1sth!2sth!4v1737944701230!5m2!1sth!2sth"
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </motion.div>
+        </main>
+      </div>
+      <Footer />
+    </div>
+  );
+ }
