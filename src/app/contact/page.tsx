@@ -197,7 +197,7 @@ export default function ContactPage() {
                   </div>
                   <div className="aspect-video rounded-xl overflow-hidden border border-gray-700/50">
                     <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3..."
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1121.3480258256152!2d99.92550294634958!3d19.03072864864562!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30d83369a5508b77%3A0xab770e6e1fa013c6!2z4Lib4LmJ4Liy4Lii4Lir4LiZ4LmJ4Liy4Lih4Lir4Liy4Lin4Li04LiX4Lii4Liy4Lil4Lix4Lii4Lie4Liw4LmA4Lii4Liy!5e0!3m2!1sth!2sth!4v1737944701230!5m2!1sth!2sth"
                       width="100%"
                       height="100%"
                       style={{ border: 0 }}
