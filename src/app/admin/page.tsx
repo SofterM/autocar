@@ -74,26 +74,29 @@ const AdminDashboard = () => {
   };
 
   const getTodayAppointments = (appointments: Appointment[]) => {
+    // สร้างวันที่ปัจจุบันในรูปแบบ YYYY-MM-DD
     const today = new Date();
-    today.setUTCHours(today.getUTCHours() + 7); // ปรับเป็น timezone ไทย (+7)
-    const todayStr = today.toISOString().split('T')[0];
-    
+    const todayStr = today.toLocaleDateString('en-CA'); // รูปแบบ YYYY-MM-DD
+  
     return appointments
-        .filter(appointment => {
-            const appointmentDate = appointment.appointment_date.split('T')[0];
-            return appointmentDate === todayStr;
-        })
-        .sort((a, b) => a.appointment_time.localeCompare(b.appointment_time))
-        .map(appointment => ({
-            id: appointment.id,
-            time: appointment.appointment_time,
-            customerName: `${appointment.user?.firstName || ''} ${appointment.user?.lastName || ''}`.trim() || 'ไม่ระบุ',
-            phone: appointment.user?.phone || 'ไม่ระบุ',
-            service: appointment.service || 'ไม่ระบุ',
-            repair_details: appointment.repair_details || '',
-            status: appointment.status
-        }));
+      .filter(appointment => {
+        // แปลง appointment_date เป็นรูปแบบ YYYY-MM-DD
+        const appointmentDate = new Date(appointment.appointment_date)
+          .toLocaleDateString('en-CA');
+        return appointmentDate === todayStr;
+      })
+      .sort((a, b) => a.appointment_time.localeCompare(b.appointment_time))
+      .map(appointment => ({
+        id: appointment.id,
+        time: appointment.appointment_time,
+        customerName: `${appointment.user?.firstName || ''} ${appointment.user?.lastName || ''}`.trim() || 'ไม่ระบุ',
+        phone: appointment.user?.phone || 'ไม่ระบุ',
+        service: appointment.service || 'ไม่ระบุ',
+        repair_details: appointment.repair_details || '',
+        status: appointment.status
+      }));
   };
+  
 
   const fetchAppointments = async () => {
     try {
@@ -319,21 +322,24 @@ const AdminDashboard = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
   {/* Recent Repairs */}
-  <div className="lg:col-span-2 bg-white rounded-xl shadow-sm">
-    <div className="p-4 lg:p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-bold text-gray-900">งานซ่อมล่าสุด</h2>
-        <button 
-          onClick={() => router.push('/admin/repairs')}
-          className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
-        >
-          ดูทั้งหมด
-        </button>
-      </div>
-      <div className="max-h-96 overflow-y-auto pr-2">
-        <div className="space-y-4">
-          {recentRepairs.map((repair) => (
-            <div key={repair.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors gap-4">
+<div className="lg:col-span-2 bg-white rounded-xl shadow-sm">
+  <div className="p-4 lg:p-6">
+    <div className="flex items-center justify-between mb-6">
+      <h2 className="text-lg font-bold text-gray-900">งานซ่อมล่าสุด</h2>
+      <button
+        onClick={() => router.push('/admin/repairs')}
+        className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+      >
+        ดูทั้งหมด
+      </button>
+    </div>
+    <div className="max-h-96 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-indigo-600 scrollbar-track-gray-100 hover:scrollbar-thumb-indigo-700">
+      <div className="space-y-4">
+        {recentRepairs.map((repair) => (
+          <div 
+            key={repair.id} 
+            className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border border-gray-100 
+            hover:border-indigo-200 hover:shadow-md transition-all duration-200 gap-4 bg-white">
               <div className="space-y-1">
                 <p className="font-medium text-gray-900">{repair.customer}</p>
                 <p className="text-sm text-gray-600">{repair.carModel}</p>
@@ -355,24 +361,26 @@ const AdminDashboard = () => {
     </div>
   </div>
 
-              {/* Upcoming Appointments */}
-              <div className="bg-white rounded-xl shadow-sm">
-                <div className="p-4 lg:p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-lg font-bold text-gray-900">นัดหมายวันนี้</h2>
-                    <button 
-                      onClick={() => router.push('/admin/appointments')}
-                      className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
-                    >
-                      ดูทั้งหมด
-                    </button>
-                  </div>
-                  <div className="max-h-96 overflow-y-auto pr-2">
-                    <div className="space-y-4">
-                      {todayAppointments.map((appointment) => (
-                        <div key={appointment.id} 
-                          className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors gap-4"
-                        >
+              {/* Today's Appointments */}
+<div className="bg-white rounded-xl shadow-sm">
+  <div className="p-4 lg:p-6">
+    <div className="flex items-center justify-between mb-6">
+      <h2 className="text-lg font-bold text-gray-900">นัดหมายวันนี้</h2>
+      <button
+        onClick={() => router.push('/admin/appointments')}
+        className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+      >
+        ดูทั้งหมด
+      </button>
+    </div>
+    <div className="max-h-96 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-indigo-600 scrollbar-track-gray-100 hover:scrollbar-thumb-indigo-700">
+      <div className="space-y-4">
+        {todayAppointments.map((appointment) => (
+          <div 
+            key={appointment.id}
+            className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border border-gray-100 
+            hover:border-indigo-200 hover:shadow-md transition-all duration-200 gap-4 bg-white"
+          >
                           <div className="space-y-1">
                             <p className="font-medium text-gray-900">{appointment.customerName}</p>
                             <p className="text-sm text-gray-600">{appointment.phone}</p>
