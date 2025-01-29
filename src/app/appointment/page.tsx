@@ -279,25 +279,29 @@ export default function AppointmentPage() {
                />
              </div>
              <div className="bg-gray-900/95 backdrop-blur-lg p-6 rounded-xl border border-gray-700">
-               <label className="flex items-center space-x-2 text-white font-medium mb-3">
-                 <Clock className="w-5 h-5 text-[#6C63FF]" />
-                 <span>เลือกเวลา:</span>
-               </label>
-               <select 
-                 value={selectedTime}
-                 onChange={(e) => setSelectedTime(e.target.value)}
-                 className="w-full p-3 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-[#6C63FF]/50"
-               >
-                 <option value="">เลือกเวลา</option>
-                 <option value="09:00">09:00</option>
-                 <option value="10:00">10:00</option>
-                 <option value="11:00">11:00</option>
-                 <option value="13:00">13:00</option>
-                 <option value="14:00">14:00</option>
-                 <option value="15:00">15:00</option>
-                 <option value="16:00">16:00</option>
-               </select>
-             </div>
+  <label className="flex items-center space-x-2 text-white font-medium mb-3">
+    <Clock className="w-5 h-5 text-[#6C63FF]" />
+    <span>เลือกเวลา:</span>
+  </label>
+  <select
+    value={selectedTime}
+    onChange={(e) => setSelectedTime(e.target.value)}
+    className="w-full p-3 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-[#6C63FF]/50"
+  >
+    <option value="">เลือกเวลา</option>
+    <option value="08:00">08:00</option>
+    <option value="09:00">09:00</option>
+    <option value="10:00">10:00</option>
+    <option value="11:00">11:00</option>
+    <option value="12:00">12:00</option>
+    <option value="13:00">13:00</option>
+    <option value="14:00">14:00</option>
+    <option value="15:00">15:00</option>
+    <option value="16:00">16:00</option>
+    <option value="17:00">17:00</option>
+  </select>
+</div>
+
            </motion.div>
           <div className="mb-12">
             <CalendarBookings/>
