@@ -56,7 +56,7 @@ export default function ContactPage() {
               <motion.h1 
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#6C63FF] to-blue-500 mb-6"
+                className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r text-white mb-6"
               >
                 ติดต่อเรา
               </motion.h1>
@@ -77,9 +77,10 @@ export default function ContactPage() {
             ) : contactInfo && (
               <div className="space-y-12">
                 <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-2xl border border-gray-700/50 shadow-lg"
+                             className="bg-gray-900/95 backdrop-blur-lg p-6 rounded-xl border border-gray-700 mb-8"
+                             initial={{ opacity: 0, y: 20 }}
+                             animate={{ opacity: 1, y: 0 }}
+                             transition={{ delay: 0.6 }}
                 >
                   <div className="grid md:grid-cols-2 gap-8">
                     {/* Company Info Section */}
@@ -90,7 +91,7 @@ export default function ContactPage() {
                             <Building2 className="w-6 h-6 text-[#6C63FF]" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-[#6C63FF] transition-colors">{contactInfo.company_name}</h3>
+                            <h3 className="text-xl font-semibold text-[#6C63FF] mb-2 group-hover:text-[#ffffff] transition-colors">{contactInfo.company_name}</h3>
                             <p className="text-gray-400">เลขประจำตัวผู้เสียภาษี: {contactInfo.tax_id}</p>
                           </div>
                         </div>
@@ -102,8 +103,8 @@ export default function ContactPage() {
                             <Mail className="w-6 h-6 text-[#6C63FF]" />
                           </div>
                           <div>
-                            <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[#6C63FF] transition-colors">อีเมล</h3>
-                            <a href={`mailto:${contactInfo.email}`} className="text-[#6C63FF] hover:underline">
+                            <h3 className="text-lg font-semibold text-[#6C63FF] mb-2 group-hover:text-[#ffffff] transition-colors">อีเมล</h3>
+                            <a href={`mailto:${contactInfo.email}`} className="text-gray-200 mb-2 group-hover:text-[#6C63FF] transition-colors hover:underline">
                               {contactInfo.email}
                             </a>
                           </div>
@@ -119,13 +120,13 @@ export default function ContactPage() {
                             <Phone className="w-6 h-6 text-[#6C63FF]" />
                           </div>
                           <div>
-                            <h3 className="text-lg font-semibold text-white mb-3 group-hover:text-[#6C63FF] transition-colors">เบอร์ติดต่อ</h3>
+                            <h3 className="text-lg font-semibold text-[#6C63FF] mb-3 group-hover:text-[hsl(0,0%,100%)] transition-colors">เบอร์ติดต่อ</h3>
                             <div className="space-y-2">
-                              <p className="text-gray-400">
+                              <p className="text-gray-200">
                                 <span className="text-sm text-gray-500">ฝ่ายช่าง:</span><br />
                                 {contactInfo.technician_phone}
                               </p>
-                              <p className="text-gray-400">
+                              <p className="text-gray-200">
                                 <span className="text-sm text-gray-500">ผู้จัดการ:</span><br />
                                 {contactInfo.manager_phone}
                               </p>
@@ -147,16 +148,16 @@ export default function ContactPage() {
                       content: contactInfo.facebook,
                       isLink: true 
                     },
-                    { icon: Send, title: 'Line', content: contactInfo.line }
+                    { icon: Send, title: 'Line', content: contactInfo.line , isLink: true }
                   ].map((item, index) => (
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 * (index + 1) }}
-                      className="group bg-gradient-to-br from-gray-900 to-gray-800 p-6 rounded-xl border border-gray-700/50 hover:border-[#6C63FF]/50 transition-all duration-300 shadow-lg"
+                      className="group bg-gradient-to-br from-bg-gray-900/95 backdrop-blur-lg p-6 rounded-xl border border-gray-700 mb-8"
                     >
-                      <div className="flex items-start gap-4">
+                      <div className="flex items-start gap-4 text-[#6C63FF] ">
                         <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center group-hover:bg-[#6C63FF]/20 transition-colors">
                           <item.icon className="w-6 h-6 text-[#6C63FF]" />
                         </div>
@@ -169,7 +170,7 @@ export default function ContactPage() {
                               href={item.content}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-[#6C63FF] hover:underline"
+                              className="text-[#6C63FF] mb-2 group-hover:text-gray-200 transition-colors hover:underline"
                             >
                               {item.content}
                             </a>
