@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, Mail, Phone, MapPin, Facebook, Send, Map } from 'lucide-react';
+// import { Building2, Mail, Phone, MapPin, Facebook, Send, Map } from 'lucide-react';
 import StarryBackground from '@/components/StarryBackground';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -131,7 +131,7 @@ export default function NotificationPage() {
               <div className="flex justify-center items-center min-h-[400px]">
                 <div className="animate-spin h-8 w-8 border-4 border-[#6C63FF] border-t-transparent rounded-full" />
               </div>
-            ) : notifications && (
+            ) : notifications && notifications.length > 0 ? (
               <div className="space-y-12">
                 <motion.div 
                              className="bg-gray-900/95 backdrop-blur-lg p-6 rounded-xl border border-gray-700 mb-8"
@@ -174,6 +174,8 @@ export default function NotificationPage() {
                       ))}
                 </motion.div>
               </div>
+            ) : (
+              <div className="text-center text-gray-400 mt-6 text-xl">ไม่มีการแจ้งเตือนในวันนี้</div>
             )}
           </motion.div>
         </main>
