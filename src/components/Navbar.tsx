@@ -22,6 +22,34 @@ interface AuthResponse {
   user: UserType;
 }
 
+interface Booking {
+  id: number
+  user_id: number
+  service: string
+  repair_details: string | null 
+  appointment_date: string
+  appointment_time: string
+  status: 'pending' | 'confirmed' | 'cancelled'
+  user: {
+    firstName: string
+    lastName: string
+    phone: string | null
+  }
+}
+
+interface notiData {
+  id: number
+  message: {
+    name: string
+    service: string
+    repair_details: string | null 
+    phone: string | null
+    time: string
+    status: 'pending' | 'confirmed' | 'cancelled'
+  };
+  isRead: boolean
+}
+
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
@@ -29,16 +57,37 @@ export default function Navbar() {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [user, setUser] = useState<UserType | null>(null)
-  const [notifications, setNotifications] = useState([
-    { id: 1, message: "มีการแจ้งเตือนใหม่", isRead: false },
-    { id: 2, message: "ระบบอัพเดทเรียบร้อยแล้ว", isRead: true },
-  ])
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [notifications, setNotifications] = useState<notiData[]>([])
   
   const pathname = usePathname()
   const router = useRouter()
   
   const userMenuRef = useRef<HTMLDivElement>(null)
   const notificationsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    fetchBookings()
+  }, [currentDate])
+
+  useEffect(() => {
+    const bookingData: notiData[] = getDayBookings().map(booking => ({
+      id: booking.id,
+      message: {
+        name: booking.user.firstName + " " + booking.user.lastName,
+        service: booking.service,
+        repair_details: booking.repair_details, 
+        phone: booking.user.phone,
+        time: booking.appointment_time,
+        status: booking.status
+      },
+      isRead: false
+    }))
+
+    setNotifications(bookingData)
+  }, [bookings])
+
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -69,6 +118,30 @@ export default function Navbar() {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [])
+
+  const fetchBookings = async () => {
+    try {
+      const year = currentDate.getFullYear()
+      const month = currentDate.getMonth() + 1
+      const response = await fetch(`/api/appointments?&year=${year}&month=${month}`)
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch bookings')
+      }
+      
+      const data = await response.json()
+      setBookings(data)
+    } catch (error) {
+      console.error('Error fetching bookings:', error)
+    }
+  }
+
+  const getDayBookings = () => {
+    return bookings.filter(booking => 
+      new Date(booking.appointment_date).getDate() === currentDate.getDate()
+    ).sort((a, b) => a.appointment_time.localeCompare(b.appointment_time))
+  }
+
 
   const handleAuthResponse = (response: AuthResponse) => {
     const { token, user } = response
@@ -121,13 +194,30 @@ export default function Navbar() {
     ))
   }
 
+  const getStatusColor = (status: Booking['status']) => {
+    const colors = {
+      pending: 'bg-yellow-500 text-white',
+      confirmed: 'bg-green-500 text-white',
+      cancelled: 'bg-red-500 text-white'
+    }
+    return colors[status] || 'bg-gray-500 text-white'
+  }
+
+  const StatusBadge = ({ status }: { status: Booking['status'] }) => (
+    <span className={`px-2 py-1 rounded-full text-[10px] sm:text-xs ${getStatusColor(status)}`}>
+      {status === 'pending' && 'รอยืนยัน'}
+      {status === 'confirmed' && 'ยืนยันแล้ว'}
+      {status === 'cancelled' && 'ยกเลิก'}
+    </span>
+  )
+
   return (
     <>
       <motion.nav
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="container mx-auto px-4 sm:px-6 py-4 relative z-10"
+        className="container mx-auto px-4 sm:px-6 py-4 relative z-50"
       >
         <div className="flex items-center justify-between">
         <motion.div
@@ -199,8 +289,12 @@ export default function Navbar() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 w-72 rounded-lg bg-white shadow-lg py-2 text-gray-800"
+                      className="absolute right-0 mt-2 w-72 max-h-80 overflow-y-auto rounded-lg bg-white shadow-lg py-2 text-gray-800"
                     >
+                      <div className='px-4 py-3 hover:bg-gray-50'>
+                        <p className="text-sm sm:text-base font-medium text-dark">การแจ้งเตือนของวันนี้ทั้งหมด</p>
+                        <motion.a href="/notification" className="text-sm font-small text-dark">เปิดหน้าการแจ้งเตือน</motion.a>
+                      </div>
                       {notifications.map((notification) => (
                         <div
                           key={notification.id}
@@ -209,7 +303,32 @@ export default function Navbar() {
                             !notification.isRead ? 'bg-blue-50' : ''
                           }`}
                         >
-                          <p className="text-sm">{notification.message}</p>
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1 pr-2">
+                              <p className="text-sm sm:text-base font-medium text-dark">
+                                {notification.message.name}
+                              </p>
+                              <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                                บริการ: {notification.message.service}
+                              </p>
+                              {notification.message.repair_details && (
+                                <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                                รายละเอียด: {notification.message.repair_details}
+                              </p>
+                              )}
+                              {notification.message.phone && (
+                                <p className="text-xs sm:text-sm text-gray-600">
+                                เบอร์โทรศัพท์: {notification.message.phone}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex flex-col items-end gap-1 sm:gap-2">
+                              <span className="text-xs sm:text-sm text-[#6C63FF] font-medium">
+                                {notification.message.time} น.
+                              </span>
+                              <StatusBadge status={notification.message.status} />
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </motion.div>
