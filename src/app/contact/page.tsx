@@ -91,8 +91,8 @@ export default function ContactPage() {
                             <Building2 className="w-6 h-6 text-[#6C63FF]" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-semibold text-[#6C63FF] mb-2 group-hover:text-[#ffffff] transition-colors">{contactInfo.company_name}</h3>
-                            <p className="text-gray-400">เลขประจำตัวผู้เสียภาษี: {contactInfo.tax_id}</p>
+                            <h3 className="text-xl font-semibold text-[#6C63FF] mb-2 group-hover:text-[#ffffff] transition-colors">ชื่อบริษัท</h3>
+                            <p className="text-gray-400">{contactInfo.company_name}</p>
                           </div>
                         </div>
                       </div>
@@ -115,7 +115,7 @@ export default function ContactPage() {
                     {/* Phone Section */}
                     <div className="space-y-6">
                       <div className="group">
-                        <div className="flex items-start gap-4 bg-black/20 p-6 rounded-xl border border-gray-700/50 hover:border-[#6C63FF]/50 transition-all duration-300">
+                        <div className="flex py-12 items-start gap-4 bg-black/20 p-6 rounded-xl border border-gray-700/50 hover:border-[#6C63FF]/50 transition-all duration-300">
                           <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center group-hover:bg-[#6C63FF]/20 transition-colors">
                             <Phone className="w-6 h-6 text-[#6C63FF]" />
                           </div>
@@ -124,11 +124,17 @@ export default function ContactPage() {
                             <div className="space-y-2">
                               <p className="text-gray-200">
                                 <span className="text-sm text-gray-500">ฝ่ายช่าง:</span><br />
-                                {contactInfo.technician_phone}
+                                <div className="flex items-center gap-2 group">
+                                  <Phone className="w-4 h-4 text-[#6C63FF] group-hover:text-[#6C63FF]" />
+                                  {contactInfo.technician_phone}
+                                </div>
                               </p>
                               <p className="text-gray-200">
                                 <span className="text-sm text-gray-500">ผู้จัดการ:</span><br />
-                                {contactInfo.manager_phone}
+                                <div className="flex items-center gap-2 group">
+                                  <Phone className="w-4 h-4 text-[#6C63FF] group-hover:text-[#6C63FF]" />
+                                  {contactInfo.manager_phone}
+                                </div>
                               </p>
                             </div>
                           </div>
