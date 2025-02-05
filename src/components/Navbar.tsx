@@ -266,8 +266,8 @@ export default function Navbar() {
             ))}
           </div>
 
-          {user ? (
             <div className="hidden md:flex items-center space-x-6">
+            {user && (user.role === 'admin' || user.role === 'technician') && (
               <div className="relative" ref={notificationsRef}>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -335,7 +335,8 @@ export default function Navbar() {
                   )}
                 </AnimatePresence>
               </div>
-
+              )}
+              {user ? (
               <div className="relative" ref={userMenuRef}>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -374,8 +375,8 @@ export default function Navbar() {
                   )}
                 </AnimatePresence>
               </div>
-            </div>
-          ) : (
+              ) : (
+          
             <div className="hidden md:flex items-center space-x-4">
               <motion.button
                 onClick={() => setShowRegisterModal(true)}
@@ -395,6 +396,7 @@ export default function Navbar() {
               </motion.button>
             </div>
           )}
+          </div>
         </div>
 
         <AnimatePresence>
