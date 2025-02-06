@@ -298,7 +298,6 @@ export default function AppointmentPage() {
     <option value="14:00">14:00</option>
     <option value="15:00">15:00</option>
     <option value="16:00">16:00</option>
-    <option value="17:00">17:00</option>
   </select>
 </div>
 
