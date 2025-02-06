@@ -20,6 +20,7 @@ export function EditTechnicianModal({
     const [name, setName] = useState(technician?.name || '');
     const [position, setPosition] = useState(technician?.position || '');
     const [status, setStatus] = useState(technician?.status || 'active');
+    const [salary, setSalary] = useState(technician?.salary?.toString() || ''); // เพิ่ม state สำหรับเงินเดือน
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -28,6 +29,7 @@ export function EditTechnicianModal({
             setName(technician.name);
             setPosition(technician.position);
             setStatus(technician.status);
+            setSalary(technician.salary?.toString() || ''); // อัพเดท salary เมื่อ technician เปลี่ยน
         }
     }, [technician]);
 
@@ -45,7 +47,8 @@ export function EditTechnicianModal({
                 body: JSON.stringify({
                     name,
                     position,
-                    status
+                    status,
+                    salary: salary ? parseFloat(salary) : null // เพิ่ม salary ในการส่งข้อมูล
                 }),
             });
 
@@ -113,13 +116,13 @@ export function EditTechnicianModal({
                     <div className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                ชื่อ-นามสกุล
+                                ชื่อช่าง
                             </label>
                             <input
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                 required
                             />
                         </div>
@@ -132,7 +135,23 @@ export function EditTechnicianModal({
                                 type="text"
                                 value={position}
                                 onChange={(e) => setPosition(e.target.value)}
-                                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                required
+                            />
+                        </div>
+
+                        {/* เพิ่มฟิลด์เงินเดือน */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                เงินเดือน
+                            </label>
+                            <input
+                                type="number"
+                                value={salary}
+                                onChange={(e) => setSalary(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                min="0"
+                                step="100"
                                 required
                             />
                         </div>
@@ -144,7 +163,7 @@ export function EditTechnicianModal({
                             <select
                                 value={status}
                                 onChange={(e) => setStatus(e.target.value)}
-                                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             >
                                 <option value="active">ใช้งาน</option>
                                 <option value="inactive">ไม่ใช้งาน</option>

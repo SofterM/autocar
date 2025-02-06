@@ -5,12 +5,13 @@ import pool from '@/lib/db';
 export async function GET() {
     try {
         const query = `
-            SELECT 
+            SELECT
                 CAST(t.id AS CHAR) as id,
                 t.name,
                 t.position,
                 t.status,
                 t.user_id,
+                t.salary,
                 u.email,
                 u.phone,
                 u.first_name,
@@ -31,11 +32,13 @@ export async function GET() {
     }
 }
 
+
+
 export async function POST(req: Request) {
     let connection;
     try {
         const body = await req.json();
-        const { userId, name, position } = body;
+        const { userId, name, position, salary } = body;  // เพิ่ม salary ในการรับค่า
 
         connection = await pool.getConnection();
         await connection.beginTransaction();
@@ -49,11 +52,10 @@ export async function POST(req: Request) {
         );
 
         if ((existingTech as any[]).length > 0) {
-            // If technician exists but is inactive, reactivate them
             if ((existingTech as any[])[0].status === 'inactive') {
                 await connection.execute(
-                    'UPDATE technicians SET status = ?, name = ?, position = ? WHERE user_id = ?',
-                    ['active', name, position, userIdBigInt]
+                    'UPDATE technicians SET status = ?, name = ?, position = ?, salary = ? WHERE user_id = ?',
+                    ['active', name, position, salary, userIdBigInt]  // เพิ่ม salary
                 );
                 await connection.execute(
                     'UPDATE users SET role = ? WHERE id = ?',
@@ -70,9 +72,9 @@ export async function POST(req: Request) {
 
         // Create new technician
         const [result] = await connection.execute(
-            `INSERT INTO technicians (user_id, name, position, status)
-             VALUES (?, ?, ?, 'active')`,
-            [userIdBigInt, name, position]
+            `INSERT INTO technicians (user_id, name, position, status, salary)
+             VALUES (?, ?, ?, 'active', ?)`,  // เพิ่ม salary ในการ insert
+            [userIdBigInt, name, position, salary]
         );
 
         await connection.execute(

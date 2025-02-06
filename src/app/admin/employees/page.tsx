@@ -104,6 +104,10 @@ export default function EmployeesPage() {
                     <Phone className="h-4 w-4 mr-2" />
                     {(technician as any).phone}
                 </div>
+                <div className="flex items-center text-sm text-gray-600">
+                    <span className="mr-2">฿</span>
+                    {technician.salary?.toLocaleString('th-TH')}
+                </div>
             </div>
             
             <div className="flex justify-end">
@@ -157,7 +161,7 @@ export default function EmployeesPage() {
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                                     <input
                                         type="text"
-                                        placeholder="ค้นหาช่างซ่อม..."
+                                        placeholder="ค้นหาช่างซ่อม"
                                         className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg text-gray-900"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -182,6 +186,9 @@ export default function EmployeesPage() {
                                         </th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             เบอร์โทร
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            เงินเดือน
                                         </th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             สถานะ
@@ -212,6 +219,14 @@ export default function EmployeesPage() {
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="text-sm text-gray-900">
                                                     {(technician as any).phone}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-900">
+                                                    {technician.salary?.toLocaleString('th-TH', {
+                                                        style: 'currency',
+                                                        currency: 'THB'
+                                                    })}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
