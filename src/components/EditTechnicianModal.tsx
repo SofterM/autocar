@@ -20,7 +20,14 @@ export function EditTechnicianModal({
     const [name, setName] = useState(technician?.name || '');
     const [position, setPosition] = useState(technician?.position || '');
     const [status, setStatus] = useState(technician?.status || 'active');
-    const [salary, setSalary] = useState(technician?.salary?.toString() || ''); // เพิ่ม state สำหรับเงินเดือน
+    const [salary, setSalary] = useState(technician?.salary?.toString() || '');
+    
+    // ฟังก์ชันสำหรับ validate salary
+    const validateSalary = (value: string) => {
+        const numValue = parseFloat(value);
+        return !isNaN(numValue) && numValue >= 0;
+    };
+    
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -29,13 +36,20 @@ export function EditTechnicianModal({
             setName(technician.name);
             setPosition(technician.position);
             setStatus(technician.status);
-            setSalary(technician.salary?.toString() || ''); // อัพเดท salary เมื่อ technician เปลี่ยน
+            setSalary(technician.salary?.toString() || '');
         }
     }, [technician]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        
+        // Validate salary before submitting
+        if (salary && !validateSalary(salary)) {
+            setError('กรุณาระบุเงินเดือนเป็นตัวเลขที่มากกว่าหรือเท่ากับ 0');
+            return;
+        }
+        
         setIsLoading(true);
 
         try {
@@ -48,7 +62,7 @@ export function EditTechnicianModal({
                     name,
                     position,
                     status,
-                    salary: salary ? parseFloat(salary) : null // เพิ่ม salary ในการส่งข้อมูล
+                    salary: salary ? parseFloat(salary) : null
                 }),
             });
 
@@ -140,7 +154,6 @@ export function EditTechnicianModal({
                             />
                         </div>
 
-                        {/* เพิ่มฟิลด์เงินเดือน */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 เงินเดือน
@@ -148,7 +161,13 @@ export function EditTechnicianModal({
                             <input
                                 type="number"
                                 value={salary}
-                                onChange={(e) => setSalary(e.target.value)}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    // อนุญาตให้ใส่ค่าว่างหรือตัวเลขเท่านั้น
+                                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                        setSalary(value);
+                                    }
+                                }}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                 min="0"
                                 step="100"

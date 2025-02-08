@@ -10,7 +10,7 @@ export async function PATCH(
     try {
         const { id } = await params;
         const body = await request.json();
-        const { name, position, status } = body;
+        const { name, position, status, salary } = body;
 
         connection = await pool.getConnection();
         await connection.beginTransaction();
@@ -31,9 +31,9 @@ export async function PATCH(
         // Update technician
         await connection.execute(
             `UPDATE technicians 
-             SET name = ?, position = ?, status = ?
+             SET name = ?, position = ?, status = ?, salary = ?  # เพิ่ม salary
              WHERE id = ?`,
-            [name, position, status, id]
+            [name, position, status, salary, id]  // เพิ่ม salary ในพารามิเตอร์
         );
 
         // Update user role only if status changed

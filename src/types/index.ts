@@ -9,13 +9,16 @@ export interface User {
 }
 
 export interface Technician {
-    id: number;
-    user_id: number;
+    id: string;
     name: string;
     position: string;
     status: string;
-    created_at: string;
-    updated_at: string;
+    salary: number | null;  // เพิ่ม salary
+    user_id: string;
+    email?: string;
+    phone?: string;
+    first_name?: string;
+    last_name?: string;
 }
 
 export interface Contact {
