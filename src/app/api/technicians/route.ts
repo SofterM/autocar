@@ -1,9 +1,9 @@
-// src/app/api/technicians/route.ts
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
 export async function GET() {
     try {
+        // เพิ่ม searchParams เพื่อให้สามารถเลือกดึงเฉพาะ active ได้
         const query = `
             SELECT
                 CAST(t.id AS CHAR) as id,
@@ -15,10 +15,14 @@ export async function GET() {
                 u.email,
                 u.phone,
                 u.first_name,
-                u.last_name
+                u.last_name,
+                CASE 
+                    WHEN t.status = 'active' THEN 'ใช้งาน'
+                    ELSE 'ไม่ใช้งาน'
+                END as status_th
             FROM technicians t
             JOIN users u ON t.user_id = u.id
-            ORDER BY t.name ASC
+            ORDER BY t.status = 'active' DESC, t.name ASC
         `;
 
         const [rows] = await pool.execute(query);
@@ -32,20 +36,31 @@ export async function GET() {
     }
 }
 
-
-
 export async function POST(req: Request) {
     let connection;
     try {
         const body = await req.json();
-        const { userId, name, position, salary } = body;  // เพิ่ม salary ในการรับค่า
+        const { userId, name, position, salary } = body;
+
+        if (!userId || !name || !position) {
+            return NextResponse.json(
+                { error: 'Missing required fields' },
+                { status: 400 }
+            );
+        }
+
+        if (salary && (isNaN(salary) || salary < 0)) {
+            return NextResponse.json(
+                { error: 'Invalid salary value' },
+                { status: 400 }
+            );
+        }
 
         connection = await pool.getConnection();
         await connection.beginTransaction();
         
         const userIdBigInt = BigInt(userId);
 
-        // Check if user exists and is not already a technician
         const [existingTech] = await connection.execute(
             'SELECT id, status FROM technicians WHERE user_id = ?',
             [userIdBigInt]
@@ -54,12 +69,8 @@ export async function POST(req: Request) {
         if ((existingTech as any[]).length > 0) {
             if ((existingTech as any[])[0].status === 'inactive') {
                 await connection.execute(
-                    'UPDATE technicians SET status = ?, name = ?, position = ?, salary = ? WHERE user_id = ?',
-                    ['active', name, position, salary, userIdBigInt]  // เพิ่ม salary
-                );
-                await connection.execute(
-                    'UPDATE users SET role = ? WHERE id = ?',
-                    ['technician', userIdBigInt]
+                    'UPDATE technicians SET status = ?, name = ?, position = ?, salary = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?',
+                    ['active', name, position, salary, userIdBigInt]
                 );
                 await connection.commit();
                 return NextResponse.json({ success: true });
@@ -70,16 +81,10 @@ export async function POST(req: Request) {
             );
         }
 
-        // Create new technician
         const [result] = await connection.execute(
             `INSERT INTO technicians (user_id, name, position, status, salary)
-             VALUES (?, ?, ?, 'active', ?)`,  // เพิ่ม salary ในการ insert
+             VALUES (?, ?, ?, 'active', ?)`,
             [userIdBigInt, name, position, salary]
-        );
-
-        await connection.execute(
-            'UPDATE users SET role = ? WHERE id = ?',
-            ['technician', userIdBigInt]
         );
 
         await connection.commit();

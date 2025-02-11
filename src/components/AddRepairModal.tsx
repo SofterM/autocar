@@ -53,7 +53,8 @@ export const AddRepairModal: React.FC<AddRepairModalProps> = ({
 
     const fetchTechnicians = async () => {
         try {
-            const response = await fetch('/api/technicians');
+            // เปลี่ยนจาก /api/technicians เป็น /api/technicians/active
+            const response = await fetch('/api/technicians/active');
             if (!response.ok) {
                 throw new Error('Failed to fetch technicians');
             }

@@ -1,4 +1,3 @@
-// src/app/api/technicians/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
@@ -8,14 +7,34 @@ export async function PATCH(
 ) {
     let connection;
     try {
-        const { id } = await params;
+        const { id } = params;
         const body = await request.json();
         const { name, position, status, salary } = body;
+
+        if (!name || !position || !status) {
+            return NextResponse.json(
+                { error: 'Missing required fields' },
+                { status: 400 }
+            );
+        }
+
+        if (!['active', 'inactive'].includes(status)) {
+            return NextResponse.json(
+                { error: 'Invalid status value' },
+                { status: 400 }
+            );
+        }
+
+        if (salary && (isNaN(salary) || salary < 0)) {
+            return NextResponse.json(
+                { error: 'Invalid salary value' },
+                { status: 400 }
+            );
+        }
 
         connection = await pool.getConnection();
         await connection.beginTransaction();
 
-        // Get current technician data
         const [currentTech] = await connection.execute(
             'SELECT status FROM technicians WHERE id = ?',
             [id]
@@ -28,25 +47,12 @@ export async function PATCH(
             );
         }
 
-        // Update technician
         await connection.execute(
             `UPDATE technicians 
-             SET name = ?, position = ?, status = ?, salary = ?  # เพิ่ม salary
+             SET name = ?, position = ?, status = ?, salary = ?, updated_at = CURRENT_TIMESTAMP
              WHERE id = ?`,
-            [name, position, status, salary, id]  // เพิ่ม salary ในพารามิเตอร์
+            [name, position, status, salary, id]
         );
-
-        // Update user role only if status changed
-        const currentStatus = (currentTech as any[])[0].status;
-        if (currentStatus !== status) {
-            await connection.execute(
-                `UPDATE users u
-                 JOIN technicians t ON u.id = t.user_id
-                 SET u.role = ?
-                 WHERE t.id = ?`,
-                [status === 'active' ? 'technician' : 'staff', id]
-            );
-        }
 
         await connection.commit();
         return NextResponse.json({ 
@@ -72,12 +78,11 @@ export async function DELETE(
 ) {
     let connection;
     try {
-        const { id } = await params;
+        const { id } = params;
 
         connection = await pool.getConnection();
         await connection.beginTransaction();
 
-        // Check if technician exists and get user_id
         const [technicians] = await connection.execute(
             'SELECT user_id FROM technicians WHERE id = ?',
             [id]
@@ -90,28 +95,19 @@ export async function DELETE(
             );
         }
 
-        const technician = (technicians as any[])[0];
-
-        // Update user role back to staff
-        await connection.execute(
-            'UPDATE users SET role = ? WHERE id = ?',
-            ['staff', technician.user_id]
-        );
-
-        // First delete repair assignments
+        // Remove technician assignments from repairs
         await connection.execute(
             'UPDATE repairs SET technician_id = NULL WHERE technician_id = ?',
             [id]
         );
 
-        // Now delete the technician record
+        // Delete the technician record
         await connection.execute(
             'DELETE FROM technicians WHERE id = ?',
             [id]
         );
 
         await connection.commit();
-
         return NextResponse.json({ 
             message: 'Technician deleted successfully'
         });
