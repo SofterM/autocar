@@ -7,39 +7,39 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 interface ContactInfo {
- company_name: string;
- tax_id: string;
- facebook: string;
- line: string;
- email: string;
- technician_phone: string;
- manager_phone: string;
- address: string;
+  company_name: string;
+  tax_id: string;
+  facebook: string;
+  line: string;
+  email: string;
+  technician_phone: string;
+  manager_phone: string;
+  address: string;
 }
 
 export default function ContactPage() {
- const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
- const [isLoading, setIsLoading] = useState(true);
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
- useEffect(() => {
-   async function fetchContactInfo() {
-     try {
-       setIsLoading(true);
-       const response = await fetch('/api/contact-channels');
-       const data = await response.json();
-       if (data.length > 0) {
-         setContactInfo(data[0]);
-       }
-     } catch (error) {
-       console.error('Error:', error);
-     } finally {
-       setIsLoading(false);
-     }
-   }
-   fetchContactInfo();
- }, []);
+  useEffect(() => {
+    async function fetchContactInfo() {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/contact-channels');
+        const data = await response.json();
+        if (data.length > 0) {
+          setContactInfo(data[0]);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchContactInfo();
+  }, []);
 
- return (
+  return (
     <div className="flex flex-col min-h-screen">
       <StarryBackground />
       <div className="relative flex-1">
@@ -69,7 +69,7 @@ export default function ContactPage() {
                 พร้อมให้บริการและตอบคำถามทุกความต้องการของคุณ
               </motion.p>
             </div>
- 
+
             {isLoading ? (
               <div className="flex justify-center items-center min-h-[400px]">
                 <div className="animate-spin h-8 w-8 border-4 border-[#6C63FF] border-t-transparent rounded-full" />
@@ -77,10 +77,10 @@ export default function ContactPage() {
             ) : contactInfo && (
               <div className="space-y-12">
                 <motion.div 
-                             className="bg-gray-900/95 backdrop-blur-lg p-6 rounded-xl border border-gray-700 mb-8"
-                             initial={{ opacity: 0, y: 20 }}
-                             animate={{ opacity: 1, y: 0 }}
-                             transition={{ delay: 0.6 }}
+                  className="bg-gray-900/95 backdrop-blur-lg p-6 rounded-xl border border-gray-700 mb-8"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
                 >
                   <div className="grid md:grid-cols-2 gap-8">
                     {/* Company Info Section */}
@@ -96,7 +96,7 @@ export default function ContactPage() {
                           </div>
                         </div>
                       </div>
- 
+
                       <div className="group">
                         <div className="flex items-start gap-4 bg-black/20 p-6 rounded-xl border border-gray-700/50 hover:border-[#6C63FF]/50 transition-all duration-300">
                           <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center group-hover:bg-[#6C63FF]/20 transition-colors">
@@ -111,31 +111,31 @@ export default function ContactPage() {
                         </div>
                       </div>
                     </div>
- 
+
                     {/* Phone Section */}
                     <div className="space-y-6">
                       <div className="group">
-                        <div className="flex py-12 items-start gap-4 bg-black/20 p-6 rounded-xl border border-gray-700/50 hover:border-[#6C63FF]/50 transition-all duration-300">
+                        <div className="flex items-start gap-4 bg-black/20 p-6 rounded-xl border border-gray-700/50 hover:border-[#6C63FF]/50 transition-all duration-300">
                           <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center group-hover:bg-[#6C63FF]/20 transition-colors">
                             <Phone className="w-6 h-6 text-[#6C63FF]" />
                           </div>
                           <div>
                             <h3 className="text-lg font-semibold text-[#6C63FF] mb-3 group-hover:text-[hsl(0,0%,100%)] transition-colors">เบอร์ติดต่อ</h3>
                             <div className="space-y-2">
-                              <p className="text-gray-200">
-                                <span className="text-sm text-gray-500">ฝ่ายช่าง:</span><br />
-                                <div className="flex items-center gap-2 group">
+                              <div className="text-gray-200">
+                                <span className="text-sm text-gray-500">ฝ่ายช่าง:</span>
+                                <div className="flex items-center gap-2 group mt-1">
                                   <Phone className="w-4 h-4 text-[#6C63FF] group-hover:text-[#6C63FF]" />
-                                  {contactInfo.technician_phone}
+                                  <span>{contactInfo.technician_phone}</span>
                                 </div>
-                              </p>
-                              <p className="text-gray-200">
-                                <span className="text-sm text-gray-500">ผู้จัดการ:</span><br />
-                                <div className="flex items-center gap-2 group">
+                              </div>
+                              <div className="text-gray-200">
+                                <span className="text-sm text-gray-500">ผู้จัดการ:</span>
+                                <div className="flex items-center gap-2 group mt-1">
                                   <Phone className="w-4 h-4 text-[#6C63FF] group-hover:text-[#6C63FF]" />
-                                  {contactInfo.manager_phone}
+                                  <span>{contactInfo.manager_phone}</span>
                                 </div>
-                              </p>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -143,7 +143,7 @@ export default function ContactPage() {
                     </div>
                   </div>
                 </motion.div>
- 
+
                 {/* Contact Cards */}
                 <div className="grid md:grid-cols-3 gap-6">
                   {[
@@ -154,7 +154,7 @@ export default function ContactPage() {
                       content: contactInfo.facebook,
                       isLink: true 
                     },
-                    { icon: Send, title: 'Line', content: contactInfo.line , isLink: true }
+                    { icon: Send, title: 'Line', content: contactInfo.line, isLink: true }
                   ].map((item, index) => (
                     <motion.div
                       key={index}
@@ -163,7 +163,7 @@ export default function ContactPage() {
                       transition={{ delay: 0.1 * (index + 1) }}
                       className="group bg-gradient-to-br from-bg-gray-900/95 backdrop-blur-lg p-6 rounded-xl border border-gray-700 mb-8"
                     >
-                      <div className="flex items-start gap-4 text-[#6C63FF] ">
+                      <div className="flex items-start gap-4 text-[#6C63FF]">
                         <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center group-hover:bg-[#6C63FF]/20 transition-colors">
                           <item.icon className="w-6 h-6 text-[#6C63FF]" />
                         </div>
@@ -188,7 +188,7 @@ export default function ContactPage() {
                     </motion.div>
                   ))}
                 </div>
- 
+
                 {/* Map Section */}
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -222,4 +222,4 @@ export default function ContactPage() {
       <Footer />
     </div>
   );
- }
+}
