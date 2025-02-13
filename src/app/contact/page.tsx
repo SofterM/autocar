@@ -113,9 +113,9 @@ export default function ContactPage() {
                     </div>
 
                     {/* Phone Section */}
-                    <div className="space-y-6">
+                    <div className="space-y-6 w-full max-w-3xl">
                       <div className="group">
-                        <div className="flex items-start gap-4 bg-black/20 p-6 rounded-xl border border-gray-700/50 hover:border-[#6C63FF]/50 transition-all duration-300">
+                        <div className="flex-1 basis-[60%] items-start gap-4 bg-black/20 p-6 rounded-xl border border-gray-700/50 hover:border-[#6C63FF]/50 transition-all duration-300">
                           <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 flex items-center justify-center group-hover:bg-[#6C63FF]/20 transition-colors">
                             <Phone className="w-6 h-6 text-[#6C63FF]" />
                           </div>
