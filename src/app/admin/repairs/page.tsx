@@ -189,10 +189,7 @@ export default function RepairsPage() {
                             </div>
                         </div>
                         <div className="flex items-center gap-2 lg:gap-4">
-                            <button className="p-2 rounded-lg hover:bg-gray-100 relative">
-                                <Bell className="h-5 w-5 text-gray-700" />
-                                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-                            </button>
+                            
                             <button
                                 onClick={() => setIsFiltersVisible(!isFiltersVisible)}
                                 className="lg:hidden p-2 rounded-lg hover:bg-gray-100"

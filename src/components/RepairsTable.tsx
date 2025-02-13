@@ -4,6 +4,7 @@ import React from 'react';
 import { Wrench, Plus, Trash2, X } from 'lucide-react';
 import { Repair } from '@/types/repairs';
 import { formatDate, formatPhoneNumber, getStatusText, getStatusBadgeStyle } from '@/utils/format';
+import { RepairDownloadButton } from './RepairDownloadButton';
 
 interface RepairsTableProps {
     repairs: Repair[];
@@ -114,20 +115,23 @@ export const RepairsTable: React.FC<RepairsTableProps> = ({
             </div>
 
             <div className="mt-4 flex justify-end space-x-4">
-                <button 
-                    onClick={() => onViewRepair(repair)}
-                    className="text-blue-600 hover:text-blue-900 font-medium text-sm"
-                >
-                    ดูรายละเอียด
-                </button>
-                <button
-                    onClick={() => handleDeleteClick(repair)}
-                    className="text-red-600 hover:text-red-900 inline-flex items-center text-sm"
-                    title="ลบรายการ"
-                >
-                    <Trash2 className="h-4 w-4" />
-                </button>
-            </div>
+    <button 
+        onClick={() => onViewRepair(repair)}
+        className="text-blue-600 hover:text-blue-900 font-medium text-sm"
+    >
+        ดูรายละเอียด
+    </button>
+    
+    <RepairDownloadButton repair={repair} />
+    
+    <button
+        onClick={() => handleDeleteClick(repair)}
+        className="text-red-600 hover:text-red-900 inline-flex items-center text-sm"
+        title="ลบรายการ"
+    >
+        <Trash2 className="h-4 w-4" />
+    </button>
+</div>
         </div>
     );
 
@@ -207,34 +211,37 @@ export const RepairsTable: React.FC<RepairsTableProps> = ({
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right space-x-3 whitespace-nowrap">
-                                    <button 
-    onClick={() => onViewRepair(repair)}
-    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 focus:outline-none transition-all duration-300 shadow-sm"
->
-    <span>ดูรายละเอียด</span>
-    <svg 
-        className="w-4 h-4 ml-2" 
-        fill="none" 
-        stroke="currentColor" 
-        viewBox="0 0 24 24"
+    <button 
+        onClick={() => onViewRepair(repair)}
+        className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 focus:outline-none transition-all duration-300 shadow-sm"
     >
-        <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth="2" 
-            d="M9 5l7 7-7 7"
-        />
-    </svg>
-</button>
+        <span>ดูรายละเอียด</span>
+        <svg 
+            className="w-4 h-4 ml-2" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+        >
+            <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth="2" 
+                d="M9 5l7 7-7 7"
+            />
+        </svg>
+    </button>
+    
+    <RepairDownloadButton repair={repair} />
 
-                                        <button
-                                            onClick={() => handleDeleteClick(repair)}
-                                            className="text-red-600 hover:text-red-900 inline-flex items-center"
-                                            title="ลบรายการ"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </button>
-                                    </td>
+    <button
+        onClick={() => handleDeleteClick(repair)}
+        className="text-red-600 hover:text-red-900 inline-flex items-center"
+        title="ลบรายการ"
+    >
+        <Trash2 className="h-4 w-4" />
+    </button>
+</td>
+
                                 </tr>
                             ))}
                         </tbody>

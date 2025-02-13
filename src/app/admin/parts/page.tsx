@@ -9,7 +9,8 @@ import {
   Menu,
   Bell,
   Settings,
-  Filter} from 'lucide-react';
+  Filter
+} from 'lucide-react';
 import Sidebar from '@/components/admin/Sidebar';
 import { PartsTable } from '@/components/parts/PartsTable';
 import { AddPartModal } from '@/components/parts/AddPartModal';
@@ -25,6 +26,7 @@ const PartsPage = () => {
   const [editingPart, setEditingPart] = useState<Part | null>(null);
   const [parts, setParts] = useState<Part[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
   const [filters, setFilters] = useState({
     search: '',
     category: '',
@@ -71,6 +73,30 @@ const PartsPage = () => {
     }
   };
 
+  const handleDownloadPDF = async () => {
+    if (isExporting) return;
+    
+    try {
+      setIsExporting(true);
+      const response = await fetch('/api/parts/report/download');
+      if (!response.ok) throw new Error('Failed to download report');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'inventory-report.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading report:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   // Calculate summary statistics
   const totalValue = parts.reduce((sum, part) => sum + (part.price * part.stock_quantity), 0);
   const totalItems = parts.reduce((sum, part) => sum + part.stock_quantity, 0);
@@ -79,10 +105,10 @@ const PartsPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <Sidebar 
-        isSidebarOpen={isSidebarOpen} 
+      <Sidebar
+        isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
-        activeMenu="คลังอะไหล่" 
+        activeMenu="คลังอะไหล่"
       />
       
       <div className="flex-1">
@@ -104,10 +130,7 @@ const PartsPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-2 lg:gap-4">
-              <button className="p-2 rounded-lg hover:bg-gray-100 relative">
-                <Bell className="h-5 w-5 text-gray-700" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
+              
               <button
                 onClick={() => setIsFiltersVisible(!isFiltersVisible)}
                 className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
@@ -187,7 +210,7 @@ const PartsPage = () => {
                   <option value="active">ใช้งาน</option>
                   <option value="inactive">ไม่ใช้งาน</option>
                 </select>
-                <button 
+                <button
                   onClick={() => setIsCategoryModalOpen(true)}
                   className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium text-gray-700"
                 >
@@ -204,21 +227,33 @@ const PartsPage = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium text-gray-700">
-                <Download className="h-4 w-4" />
-                <span className="hidden sm:inline">ส่งออก</span>
+              <button 
+                onClick={handleDownloadPDF}
+                disabled={isExporting}
+                className={`px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium text-gray-700 ${
+                  isExporting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {isExporting ? (
+                  <>
+                    <span className="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full" />
+                    <span className="hidden sm:inline">กำลังส่งออก...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4" />
+                    <span className="hidden sm:inline">ส่งออก PDF</span>
+                  </>
+                )}
               </button>
-              <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium text-gray-700">
-                <Upload className="h-4 w-4" />
-                <span className="hidden sm:inline">นำเข้า</span>
-              </button>
+             
             </div>
           </div>
 
           {/* Parts Table */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <PartsTable 
-              parts={parts} 
+            <PartsTable
+              parts={parts}
               isLoading={isLoading}
               onUpdate={fetchParts}
               onEdit={setEditingPart}
@@ -235,7 +270,7 @@ const PartsPage = () => {
       />
 
       {editingPart && (
-        <EditPartModal 
+        <EditPartModal
           isOpen={!!editingPart}
           part={editingPart}
           onClose={() => setEditingPart(null)}
@@ -246,7 +281,7 @@ const PartsPage = () => {
         />
       )}
 
-      <CategoryModal 
+      <CategoryModal
         isOpen={isCategoryModalOpen}
         onClose={() => setIsCategoryModalOpen(false)}
       />

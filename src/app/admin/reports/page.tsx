@@ -150,38 +150,19 @@ export default function FinancialReports() {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="bg-white shadow-sm sticky top-0 z-10">
           <div className="flex items-center justify-between px-4 lg:px-6 h-16">
+            {/* แก้ไขส่วนนี้ */}
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden"
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <Menu className="h-5 w-5 text-gray-500" />
+                <Menu className="h-5 w-5 text-gray-700" />
               </button>
+              <h1 className="text-xl font-bold text-gray-900">ข้อมูลทางการเงิน</h1>
             </div>
 
             <div className="flex items-center gap-4">
-              <button className="p-2 rounded-lg hover:bg-gray-100 relative">
-                <Bell className="h-5 w-5 text-gray-500" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full" />
-              </button>
-
               <div className="relative">
-                <button
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="flex items-center gap-3 hover:bg-gray-100 rounded-lg p-2 transition-colors"
-                >
-                  <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium">
-                    {userData.firstName.charAt(0)}
-                  </div>
-                  <div className="hidden lg:block text-left">
-                    <p className="text-sm font-semibold text-gray-900">
-                      {userData.firstName} {userData.lastName}
-                    </p>
-                    <p className="text-xs text-gray-500">{userData.email}</p>
-                  </div>
-                  <ChevronDown className="h-4 w-4 text-gray-500" />
-                </button>
-
                 {isMobileMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50">
                     <div className="px-4 py-2 border-b lg:hidden">

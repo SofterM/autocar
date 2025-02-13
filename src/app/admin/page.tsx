@@ -257,10 +257,7 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <button className="p-2 rounded-lg hover:bg-gray-100 relative">
-                <Bell className="h-5 w-5 text-gray-500" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
-              </button>
+              
               <div className="hidden sm:flex items-center gap-3 border-l pl-4">
                 <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium">
                   {userData.firstName.charAt(0)}
