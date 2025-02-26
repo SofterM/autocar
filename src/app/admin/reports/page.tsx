@@ -8,7 +8,10 @@ import {
   TrendingUp,
   Wallet,
   Wrench,
-  ChevronDown
+  ChevronDown,
+  Calendar,
+  Filter,
+  Download
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/admin/Sidebar';
@@ -38,6 +41,7 @@ export default function FinancialReports() {
     lastName: 'ใช้งาน',
     email: 'user@example.com'
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   const categories = [
     { id: 'others', name: 'อื่นๆ' },
@@ -49,6 +53,7 @@ export default function FinancialReports() {
 
   useEffect(() => {
     const fetchFinancialData = async () => {
+      setIsLoading(true);
       try {
         const [monthlyResponse, statsResponse] = await Promise.all([
           fetch('/api/financial/monthly-profit'),
@@ -83,7 +88,7 @@ export default function FinancialReports() {
               title: 'ค่าใช้จ่าย',
               value: new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(data.totalExpenses),
               trend: `${data.expensesTrend > 0 ? '+' : ''}${data.expensesTrend}%`,
-              isUp: data.expensesTrend > 0,
+              isUp: data.expensesTrend < 0, // Expense going down is positive
               icon: Wallet,
               color: 'bg-amber-500'
             },
@@ -99,6 +104,8 @@ export default function FinancialReports() {
         }
       } catch (error) {
         console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -130,8 +137,16 @@ export default function FinancialReports() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Current date formatted in Thai locale
+  const currentDate = new Date().toLocaleDateString('th-TH', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
   return (
     <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar */}
       <div className={`fixed lg:relative lg:block z-30 ${isSidebarOpen ? '' : 'hidden'}`}>
         <Sidebar
           isSidebarOpen={isSidebarOpen}
@@ -140,6 +155,7 @@ export default function FinancialReports() {
         />
       </div>
 
+      {/* Overlay for mobile sidebar */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-gray-600 bg-opacity-50 z-20 lg:hidden"
@@ -147,24 +163,45 @@ export default function FinancialReports() {
         />
       )}
 
+      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-white shadow-sm sticky top-0 z-10">
+        {/* Header */}
+        <header className="bg-white shadow-md sticky top-0 z-10 border-b border-gray-100">
           <div className="flex items-center justify-between px-4 lg:px-6 h-16">
-            {/* แก้ไขส่วนนี้ */}
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                aria-label="Toggle sidebar"
               >
                 <Menu className="h-5 w-5 text-gray-700" />
               </button>
               <h1 className="text-xl font-bold text-gray-900">ข้อมูลทางการเงิน</h1>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <button className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors relative">
+                <Bell className="h-5 w-5 text-gray-700" />
+                <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+              </button>
+              
               <div className="relative">
+                <button 
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <div className="hidden sm:block text-right">
+                    <p className="text-sm font-medium text-gray-700">{userData.firstName} {userData.lastName}</p>
+                    <p className="text-xs text-gray-500">{userData.email}</p>
+                  </div>
+                  <div className="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-medium">
+                    {userData.firstName.charAt(0)}{userData.lastName.charAt(0)}
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-gray-500 hidden sm:block" />
+                </button>
+                
                 {isMobileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50">
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-100">
                     <div className="px-4 py-2 border-b lg:hidden">
                       <p className="text-sm font-semibold text-gray-900">
                         {userData.firstName} {userData.lastName}
@@ -181,45 +218,52 @@ export default function FinancialReports() {
           </div>
         </header>
 
+        {/* Main content */}
         <main className="flex-1 p-4 lg:p-6 overflow-x-hidden">
           <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            {/* Header with date and export button */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>
                 <h1 className="text-xl lg:text-2xl font-bold text-gray-900">รายงานการเงิน</h1>
                 <p className="text-sm lg:text-base text-gray-600">
-                  ข้อมูล ณ วันที่{' '}
-                  {new Date().toLocaleDateString('th-TH', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
+                  ข้อมูล ณ วันที่ {currentDate}
                 </p>
               </div>
 
               <DownloadButton />
             </div>
 
+            {/* Statistics Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-              {statistics.map((stat, index) => (
-                <StatisticCard key={index} {...stat} />
-              ))}
+              {isLoading ? (
+                Array(4).fill(0).map((_, index) => (
+                  <div key={index} className="bg-white rounded-xl shadow-sm p-6 animate-pulse">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="h-10 w-10 rounded-xl bg-gray-200"></div>
+                      <div className="h-6 w-16 bg-gray-200 rounded"></div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-5 bg-gray-200 rounded w-24"></div>
+                      <div className="h-8 bg-gray-200 rounded w-32"></div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                statistics.map((stat, index) => (
+                  <StatisticCard key={index} {...stat} />
+                ))
+              )}
             </div>
 
+            {/* Charts Section */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">รายรับและรายจ่าย</h3>
-                <div className="h-80">
-                  <RevenueExpenseChart data={monthlyData} />
-                </div>
-              </div>
+              {/* Revenue & Expense Chart */}
+              <RevenueExpenseChart data={monthlyData} />
 
-              <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">แนวโน้มกำไร</h3>
-                <div className="h-80">
-                  <ProfitTrendChart />
-                </div>
-              </div>
+              {/* Profit Trend Chart */}
+              <ProfitTrendChart data={monthlyData} />
 
+              {/* Service Distribution Chart */}
               <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">สัดส่วนบริการ</h3>
                 <div className="h-80">
@@ -227,19 +271,12 @@ export default function FinancialReports() {
                 </div>
               </div>
 
-              <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm">
-                <RecentTransactions limit={5} />
-              </div>
+              {/* Recent Transactions */}
+              <RecentTransactions limit={5} />
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-              <div className="p-4 lg:p-6 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">สรุปข้อมูลทางการเงิน</h3>
-              </div>
-              <div className="overflow-x-auto">
-                <FinancialSummaryTable />
-              </div>
-            </div>
+            {/* Financial Summary Table */}
+            <FinancialSummaryTable />
           </div>
         </main> 
       </div>
