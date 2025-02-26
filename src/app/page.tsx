@@ -11,6 +11,7 @@ import CalendarBookings from '@/components/CalendarBookings'
 import Hero from '@/components/Hero'
 import WhyChooseUs from '@/components/WhyChooseUs'
 import ScrollingServices from '@/components/ScrollingServices'
+import EnhancedFeatureSection from '@/components/EnhancedFeatureSection'
 
 const TEXTS = [
   { text: 'ระบบซ่อมบำรุงยานพาหนะ', blur: 4 },
@@ -343,6 +344,8 @@ export default function Home() {
   <CalendarBookings />
   <ScrollingServices />
   <WhyChooseUs />
+  <EnhancedFeatureSection />
+
   <Footer />
     </div>
   )
