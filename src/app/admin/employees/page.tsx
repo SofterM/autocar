@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Menu, Mail, Phone, MoreVertical, Filter, ChevronDown, UserPlus, ArrowRight, Star, Clock, Users, Briefcase, XCircle } from 'lucide-react';
+import { Plus, Search, Menu, Mail, Phone, MoreVertical, Filter, ChevronDown, UserPlus, ArrowRight, Banknote, Clock, Users, Briefcase, XCircle } from 'lucide-react';
 import { User, Technician } from '@/types';
 import AddTechnicianModal from '@/components/AddTechnicianModal';
 import EditTechnicianModal from '@/components/EditTechnicianModal';
@@ -124,7 +124,7 @@ export default function EmployeesPage() {
                         <span className="text-gray-700">{(technician as any).phone}</span>
                     </div>
                     <div className="flex items-center text-sm font-medium bg-indigo-50 p-2 rounded-lg">
-                        <Star className="h-4 w-4 mr-2 text-indigo-500" />
+                        <Banknote className="h-4 w-4 mr-2 text-indigo-500" />
                         <span className="text-indigo-700">{technician.salary?.toLocaleString('th-TH')} บาท</span>
                     </div>
                 </div>
@@ -304,7 +304,7 @@ export default function EmployeesPage() {
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="text-sm font-medium text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg inline-flex items-center">
-                                                            <Star className="h-3.5 w-3.5 mr-1.5 text-indigo-500" />
+                                                            <Banknote className="h-3.5 w-3.5 mr-1.5 text-indigo-500" />
                                                             {technician.salary?.toLocaleString('th-TH', {
                                                                 style: 'currency',
                                                                 currency: 'THB'

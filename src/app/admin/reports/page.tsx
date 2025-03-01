@@ -180,39 +180,12 @@ export default function FinancialReports() {
             </div>
 
             <div className="flex items-center gap-3">
-              <button className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors relative">
-                <Bell className="h-5 w-5 text-gray-700" />
-                <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
-              </button>
+            
               
               <div className="relative">
-                <button 
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition-colors"
-                >
-                  <div className="hidden sm:block text-right">
-                    <p className="text-sm font-medium text-gray-700">{userData.firstName} {userData.lastName}</p>
-                    <p className="text-xs text-gray-500">{userData.email}</p>
-                  </div>
-                  <div className="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-medium">
-                    {userData.firstName.charAt(0)}{userData.lastName.charAt(0)}
-                  </div>
-                  <ChevronDown className="h-4 w-4 text-gray-500 hidden sm:block" />
-                </button>
                 
-                {isMobileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-100">
-                    <div className="px-4 py-2 border-b lg:hidden">
-                      <p className="text-sm font-semibold text-gray-900">
-                        {userData.firstName} {userData.lastName}
-                      </p>
-                      <p className="text-xs text-gray-500">{userData.email}</p>
-                    </div>
-                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">โปรไฟล์</a>
-                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">ตั้งค่า</a>
-                    <a href="#" className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">ออกจากระบบ</a>
-                  </div>
-                )}
+                
+                
               </div>
             </div>
           </div>
