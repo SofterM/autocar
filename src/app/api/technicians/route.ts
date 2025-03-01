@@ -16,7 +16,7 @@ export async function GET() {
                 u.phone,
                 u.first_name,
                 u.last_name,
-                CASE 
+                CASE
                     WHEN t.status = 'active' THEN 'ใช้งาน'
                     ELSE 'ไม่ใช้งาน'
                 END as status_th
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
 
         connection = await pool.getConnection();
         await connection.beginTransaction();
-        
+       
         const userIdBigInt = BigInt(userId);
 
         const [existingTech] = await connection.execute(
@@ -72,6 +72,13 @@ export async function POST(req: Request) {
                     'UPDATE technicians SET status = ?, name = ?, position = ?, salary = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?',
                     ['active', name, position, salary, userIdBigInt]
                 );
+                
+                // อัพเดทบทบาทของผู้ใช้เป็น technician
+                await connection.execute(
+                    'UPDATE users SET role = ? WHERE id = ?',
+                    ['technician', userIdBigInt]
+                );
+                
                 await connection.commit();
                 return NextResponse.json({ success: true });
             }
@@ -85,6 +92,12 @@ export async function POST(req: Request) {
             `INSERT INTO technicians (user_id, name, position, status, salary)
              VALUES (?, ?, ?, 'active', ?)`,
             [userIdBigInt, name, position, salary]
+        );
+
+        // อัพเดทบทบาทของผู้ใช้เป็น technician
+        await connection.execute(
+            'UPDATE users SET role = ? WHERE id = ?',
+            ['technician', userIdBigInt]
         );
 
         await connection.commit();
