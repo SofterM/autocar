@@ -12,6 +12,7 @@ import Hero from '@/components/Hero'
 import WhyChooseUs from '@/components/WhyChooseUs'
 import ScrollingServices from '@/components/ScrollingServices'
 import EnhancedFeatureSection from '@/components/EnhancedFeatureSection'
+import ChatButton from '@/components/VehicleChatbot/ChatButton'
 
 const TEXTS = [
   { text: 'ระบบซ่อมบำรุงยานพาหนะ', blur: 4 },
@@ -345,8 +346,9 @@ export default function Home() {
   <ScrollingServices />
   <WhyChooseUs />
   <EnhancedFeatureSection />
-
   <Footer />
+  <ChatButton />                
+
     </div>
   )
 }
