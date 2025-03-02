@@ -28,7 +28,7 @@ interface notiData {
         repair_details: string | null;
         phone: string | null;
         time: string;
-        date: string; // ✅ เพิ่มวันที่
+        date: string;
         status: 'pending' | 'confirmed' | 'cancelled';
     };
     isRead: boolean;
@@ -36,16 +36,29 @@ interface notiData {
 
 export default function NotificationPage() {
     const [bookings, setBookings] = useState<Booking[]>([]);
-    const [currentDate, setCurrentDate] = useState(new Date());
     const [notifications, setNotifications] = useState<notiData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         fetchBookings();
-    }, [currentDate]);
+    }, []);
 
     useEffect(() => {
-        const bookingData: notiData[] = getDayBookings().map(booking => ({
+        const currentDate = new Date(); // Get today's date
+        const currentDay = currentDate.getDate();
+        const currentMonth = currentDate.getMonth(); // 0-indexed (0 = January)
+        const currentYear = currentDate.getFullYear();
+
+        const filteredBookings = bookings.filter((booking) => {
+            const bookingDate = new Date(booking.appointment_date); // Assuming appointment_date is in 'YYYY-MM-DD' format
+            const bookingDay = bookingDate.getDate();
+            const bookingMonth = bookingDate.getMonth();
+            const bookingYear = bookingDate.getFullYear();
+
+            return bookingDay === currentDay && bookingMonth === currentMonth && bookingYear === currentYear;
+        });
+
+        const bookingData: notiData[] = filteredBookings.map((booking) => ({
             id: booking.id,
             message: {
                 name: booking.user.firstName + " " + booking.user.lastName,
@@ -53,7 +66,7 @@ export default function NotificationPage() {
                 repair_details: booking.repair_details,
                 phone: booking.user.phone,
                 time: booking.appointment_time,
-                date: booking.appointment_date, // ✅ เพิ่มวันที่รับรถ
+                date: booking.appointment_date,
                 status: booking.status,
             },
             isRead: false
@@ -65,27 +78,19 @@ export default function NotificationPage() {
     const fetchBookings = async () => {
         try {
             setIsLoading(true);
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth() + 1;
-            const response = await fetch(`/api/appointments?&year=${year}&month=${month}`);
+            const response = await fetch('/api/appointments'); // ดึงข้อมูลการจองทั้งหมดจาก API
 
             if (!response.ok) {
                 throw new Error('Failed to fetch bookings');
             }
 
             const data = await response.json();
-            setBookings(data);
+            setBookings(data); // เก็บข้อมูลการจองทั้งหมด
         } catch (error) {
             console.error('Error fetching bookings:', error);
         } finally {
             setIsLoading(false);
         }
-    };
-
-    const getDayBookings = () => {
-        return bookings.filter(booking =>
-            new Date(booking.appointment_date).getDate() === currentDate.getDate()
-        ).sort((a, b) => a.appointment_time.localeCompare(b.appointment_time));
     };
 
     const getStatusColor = (status: Booking['status']) => {
@@ -167,7 +172,7 @@ export default function NotificationPage() {
                                                     )}
                                                     {/* ✅ เพิ่มวันที่รับรถ */}
                                                     <p className="text-xs sm:text-sm text-gray-400">
-                                                        📅 วันที่รับรถ: {formatDateThai(notification.message.date)}
+                                                        📅 วันที่นัดหมาย: {formatDateThai(notification.message.date)}
                                                     </p>
                                                 </div>
                                                 <div className="flex flex-col items-end gap-1 sm:gap-2">
