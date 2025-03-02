@@ -47,7 +47,20 @@ export function generateAuthResponse(user: UserRow): AuthResponse {
       firstName: user.first_name,
       lastName: user.last_name,
       role: user.role,
-      phone: user.phone
+      phone: user.phone,
+      profileImage: user.profile_image || null,
+      createdAt: user.created_at
     }
+  }
+}
+
+export function verifyToken(token: string) {
+  try {
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not configured')
+    }
+    return jwt.verify(token, process.env.JWT_SECRET)
+  } catch (error) {
+    return null
   }
 }

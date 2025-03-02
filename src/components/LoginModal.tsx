@@ -1,4 +1,4 @@
-// src/components/LoginModal.tsx
+// D:\Github\autocar\src\components\LoginModal.tsx
 "use client"
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -13,6 +13,7 @@ interface LoginModalProps {
 
 export const LoginModal = ({ isOpen, onClose, isDark = true }: LoginModalProps) => {
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
@@ -43,6 +44,20 @@ export const LoginModal = ({ isOpen, onClose, isDark = true }: LoginModalProps) 
       }
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleGoogleLogin = () => {
+    try {
+      setGoogleLoading(true)
+      setError(null)
+      
+      // Redirect to Clerk's Google OAuth sign-in
+      window.location.href = '/api/auth/oauth/google'
+    } catch (err) {
+      console.error("Google auth error:", err)
+      setError('เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google กรุณาลองใหม่อีกครั้ง')
+      setGoogleLoading(false)
     }
   }
 
@@ -154,6 +169,44 @@ export const LoginModal = ({ isOpen, onClose, isDark = true }: LoginModalProps) 
                   )}
                 </button>
               </form>
+              
+              <div className="mt-6">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className={`w-full border-t ${isDark ? 'border-stone-700' : 'border-gray-200'}`}></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className={`px-2 ${isDark ? 'bg-stone-900 text-stone-400' : 'bg-white text-gray-500'}`}>
+                      หรือเข้าสู่ระบบด้วย
+                    </span>
+                  </div>
+                </div>
+                
+                <button
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  disabled={googleLoading}
+                  className={`mt-4 w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg font-medium border transition-all duration-200 ${
+                    isDark
+                      ? 'border-stone-700 bg-stone-800 hover:bg-stone-700 text-stone-100'
+                      : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-700'
+                  }`}
+                >
+                  {googleLoading ? (
+                    <Loader2 className="animate-spin w-5 h-5" />
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48">
+                        <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
+                        <path fill="#FF3D00" d="m6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z" />
+                        <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
+                        <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
+                      </svg>
+                      <span>เข้าสู่ระบบด้วย Google</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </motion.div>
         </div>

@@ -9,6 +9,10 @@ export interface UserRow extends RowDataPacket {
   last_name: string;
   role: 'admin' | 'technician' | 'staff';
   phone: string | null;
+  google_id?: string | null;
+  profile_image?: string | null;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export interface UserResponse {
@@ -18,12 +22,11 @@ export interface UserResponse {
   lastName: string;
   role: 'admin' | 'technician' | 'staff';
   phone: string | null;
+  profileImage?: string | null;
   createdAt?: Date;
 }
 
-
 export interface User {
-
   id: string;
   email: string;
   firstName?: string;
@@ -31,4 +34,3 @@ export interface User {
   role?: string;
   createdAt?: Date;
 }
-
